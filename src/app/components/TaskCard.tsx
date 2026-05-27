@@ -58,6 +58,7 @@ export function TaskCard({ task }: Props) {
         cursor: "pointer",
         position: "relative",
         overflow: "hidden",
+        flexShrink: 0,
       }}
       onMouseEnter={e => {
         if (!isCompleted) {

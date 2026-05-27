@@ -2,7 +2,12 @@
 
 import { MenuItem } from "./MenuItem";
 
-export function Sidebar() {
+type Props = {
+  view: "dashboard" | "calendar";
+  setView: (view: "dashboard" | "calendar") => void;
+};
+
+export function Sidebar({ view, setView }: Props) {
   return (
     <div
       style={{
@@ -89,8 +94,17 @@ export function Sidebar() {
 
         {/* MENU */}
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <MenuItem label="Dashboard" active />
-          <MenuItem label="Calendário" />
+          <MenuItem
+            label="Dashboard"
+            active={view === "dashboard"}
+            onClick={() => setView("dashboard")}
+          />
+
+          <MenuItem
+            label="Calendário"
+            active={view === "calendar"}
+            onClick={() => setView("calendar")}
+          />
         </div>
       </div>
 
@@ -169,10 +183,10 @@ export function Sidebar() {
             G
           </div>
           <div style={{ overflow: "hidden" }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: "#f1f5f9", letterSpacing: "-0.01em", lineHeight: 1.3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "#f1f5f9" }}>
               Guilherme
             </p>
-            <p style={{ fontSize: 10, color: "rgba(148,163,184,0.6)", lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <p style={{ fontSize: 10, color: "rgba(148,163,184,0.6)" }}>
               Operations Leader
             </p>
           </div>

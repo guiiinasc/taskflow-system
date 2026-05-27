@@ -7,9 +7,11 @@ import { TaskColumn } from "../components/TaskColumn";
 
 import { useTasks } from "../hooks/useTasks";
 import { groupTasks, getTaskStats } from "../features/tasks/task.utils";
+import { useState } from "react";
 
 export default function Dashboard() {
   const { tasks, allTasks, filter, setFilter } = useTasks();
+  const [view, setView] = useState<"dashboard" | "calendar">("dashboard");
 
   const grouped = groupTasks(tasks);
   const stats = getTaskStats(allTasks);
@@ -21,11 +23,12 @@ export default function Dashboard() {
         height: "100vh",
         background: "#0B1120",
         overflow: "hidden",
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        fontFamily:
+          "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
     >
       {/* SIDEBAR */}
-      <Sidebar />
+      <Sidebar view={view} setView={setView} />
 
       {/* CONTEÚDO PRINCIPAL */}
       <div
@@ -34,7 +37,8 @@ export default function Dashboard() {
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          background: "linear-gradient(160deg, #0F172A 0%, #0B1120 60%, #0d1117 100%)",
+          background:
+            "linear-gradient(160deg, #0F172A 0%, #0B1120 60%, #0d1117 100%)",
         }}
       >
         {/* HEADER */}
@@ -44,14 +48,11 @@ export default function Dashboard() {
         <div
           style={{
             flex: 1,
-            overflowY: "auto",
+            minHeight: 0,
+            overflow: "hidden", // 👈 IMPORTANTE (não deixar scroll geral)
             padding: "24px 28px",
             display: "flex",
             flexDirection: "column",
-            gap: 0,
-            /* scrollbar discreta */
-            scrollbarWidth: "thin",
-            scrollbarColor: "rgba(255,255,255,0.08) transparent",
           }}
         >
           {/* PAGE TITLE */}
@@ -79,39 +80,50 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* SUMMARY */}
-          <Summary
-            total={stats.total}
-            pending={stats.pending}
-            completed={stats.completed}
-          />
+          {view === "dashboard" && (
+            <>
+              {/* SUMMARY (fixo, não some mais) */}
+              <Summary
+                total={stats.total}
+                pending={stats.pending}
+                completed={stats.completed}
+              />
 
-          {/* COLUNAS */}
-          <div
-            style={{
-              display: "flex",
-              gap: 14,
-              flex: 1,
-              minHeight: 0,
-            }}
-          >
-            <TaskColumn
-              title="Hoje"
-              icon="📅"
-              tasks={grouped.today}
-              highlight
-            />
-            <TaskColumn
-              title="Amanhã"
-              icon="📆"
-              tasks={grouped.tomorrow}
-            />
-            <TaskColumn
-              title="Próximos"
-              icon="➡️"
-              tasks={grouped.upcoming}
-            />
-          </div>
+              {/* COLUNAS */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 14,
+                  flex: 1,
+                  minHeight: 0,
+                  marginTop: 16,
+                }}
+              >
+                <TaskColumn
+                  title="Hoje"
+                  icon="📅"
+                  tasks={grouped.today}
+                  highlight
+                />
+                <TaskColumn
+                  title="Amanhã"
+                  icon="📆"
+                  tasks={grouped.tomorrow}
+                />
+                <TaskColumn
+                  title="Próximos"
+                  icon="➡️"
+                  tasks={grouped.upcoming}
+                />
+              </div>
+            </>
+          )}
+
+          {view === "calendar" && (
+            <div style={{ color: "#fff" }}>
+              <h2>Calendário</h2>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -40,18 +40,18 @@ export function TaskColumn({ title, icon, tasks, highlight }: Props) {
     <div
       style={{
         flex: 1,
+        minHeight: 0,
         height: "100%",
         background: "rgba(255,255,255,0.025)",
         borderRadius: 13,
         padding: "14px 12px",
-        minHeight: 300,
         border: "1px solid rgba(255,255,255,0.06)",
         display: "flex",
         flexDirection: "column",
-        gap: 0,
+        overflow: "hidden",
       }}
     >
-      {/* HEADER DA COLUNA */}
+      {/* HEADER */}
       <div
         style={{
           display: "flex",
@@ -63,7 +63,6 @@ export function TaskColumn({ title, icon, tasks, highlight }: Props) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          {/* Ícone SVG ou fallback emoji */}
           <span
             style={{
               color: highlight ? "#94a3b8" : "rgba(148,163,184,0.5)",
@@ -86,20 +85,24 @@ export function TaskColumn({ title, icon, tasks, highlight }: Props) {
           </h3>
         </div>
 
-        {/* CONTADOR */}
         <span
           style={{
             fontSize: 11,
             fontWeight: 700,
             padding: "3px 9px",
             borderRadius: 6,
-            background: highlight && tasks.length > 0
-              ? "rgba(241,245,249,0.12)"
-              : "rgba(255,255,255,0.06)",
-            color: highlight && tasks.length > 0 ? "#f1f5f9" : "rgba(148,163,184,0.5)",
-            border: highlight && tasks.length > 0
-              ? "1px solid rgba(241,245,249,0.15)"
-              : "1px solid rgba(255,255,255,0.07)",
+            background:
+              highlight && tasks.length > 0
+                ? "rgba(241,245,249,0.12)"
+                : "rgba(255,255,255,0.06)",
+            color:
+              highlight && tasks.length > 0
+                ? "#f1f5f9"
+                : "rgba(148,163,184,0.5)",
+            border:
+              highlight && tasks.length > 0
+                ? "1px solid rgba(241,245,249,0.15)"
+                : "1px solid rgba(255,255,255,0.07)",
             minWidth: 26,
             textAlign: "center",
           }}
@@ -108,8 +111,18 @@ export function TaskColumn({ title, icon, tasks, highlight }: Props) {
         </span>
       </div>
 
-      {/* LISTA DE TASKS */}
-      <div style={{ flex: 1 }}>
+      {/* SCROLL AREA */}
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+          paddingRight: 4,
+        }}
+      >
         {tasks.length === 0 ? (
           <div
             style={{
@@ -121,19 +134,7 @@ export function TaskColumn({ title, icon, tasks, highlight }: Props) {
               gap: 8,
             }}
           >
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="rgba(148,163,184,0.2)"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            >
-              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
-              <rect x="9" y="3" width="6" height="4" rx="2" />
-            </svg>
-            <span style={{ fontSize: 11.5, color: "rgba(148,163,184,0.25)", fontWeight: 500 }}>
+            <span style={{ fontSize: 11.5, color: "rgba(148,163,184,0.25)" }}>
               Nenhuma tarefa
             </span>
           </div>

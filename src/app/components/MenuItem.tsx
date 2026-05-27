@@ -3,6 +3,7 @@
 type Props = {
   label: string;
   active?: boolean;
+  onClick?: () => void;
 };
 
 const icons: Record<string, string> = {
@@ -10,9 +11,10 @@ const icons: Record<string, string> = {
   Calendário: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
 };
 
-export function MenuItem({ label, active }: Props) {
+export function MenuItem({ label, active, onClick }: Props) {
   return (
     <div
+      onClick={onClick}
       style={{
         position: "relative",
         padding: "9px 10px",
