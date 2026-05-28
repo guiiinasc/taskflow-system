@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { MenuItem } from "./MenuItem";
 
 type Props = {
@@ -94,17 +95,21 @@ export function Sidebar({ view, setView }: Props) {
 
         {/* MENU */}
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <MenuItem
-            label="Dashboard"
-            active={view === "dashboard"}
-            onClick={() => setView("dashboard")}
-          />
+          <Link href="/dashboard" style={{ textDecoration: "none" }}>
+            <MenuItem
+              label="Dashboard"
+              active={view === "dashboard"}
+              onClick={() => setView("dashboard")}
+            />
+          </Link>
 
-          <MenuItem
-            label="Calendário"
-            active={view === "calendar"}
-            onClick={() => setView("calendar")}
-          />
+          <Link href="/calendar" style={{ textDecoration: "none" }}>
+            <MenuItem
+              label="Calendário"
+              active={view === "calendar"}
+              onClick={() => setView("calendar")}
+            />
+          </Link>
         </div>
       </div>
 
