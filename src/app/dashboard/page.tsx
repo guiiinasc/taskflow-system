@@ -7,7 +7,7 @@ import { TaskColumn } from "../components/TaskColumn";
 
 import { useTasks } from "../hooks/useTasks";
 import { groupTasks, getTaskStats } from "../features/tasks/task.utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const { tasks, allTasks, filter, setFilter } = useTasks();
@@ -16,6 +16,19 @@ export default function Dashboard() {
   const grouped = groupTasks(tasks);
   const stats = getTaskStats(allTasks);
 
+  const [isMobile, setIsMobile] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 900);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <div
       style={{
@@ -23,14 +36,42 @@ export default function Dashboard() {
         height: "100vh",
         background: "#0B1120",
         overflow: "hidden",
-        fontFamily:
-          "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
     >
-      {/* SIDEBAR */}
-      <Sidebar view={view} setView={setView} />
+      {/* SIDEBAR DESKTOP */}
+      {!isMobile && <Sidebar view={view} setView={setView} />}
 
-      {/* CONTEÚDO PRINCIPAL */}
+      {/* SIDEBAR MOBILE (OVERLAY) */}
+      {isMobile && menuOpen && (
+        <>
+          {/* BACKDROP */}
+          <div
+            onClick={() => setMenuOpen(false)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.5)",
+              zIndex: 20,
+            }}
+          />
+
+          {/* MENU */}
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              height: "100%",
+              width: 220,
+              zIndex: 30,
+            }}
+          >
+            <Sidebar view={view} setView={setView} />
+          </div>
+        </>
+      )}
+
+      {/* CONTEÚDO */}
       <div
         style={{
           flex: 1,
@@ -42,38 +83,40 @@ export default function Dashboard() {
         }}
       >
         {/* HEADER */}
-        <Header filter={filter} setFilter={setFilter} />
+        <Header
+          filter={filter}
+          setFilter={setFilter}
+          onMenuClick={() => setMenuOpen(!menuOpen)}
+          isMobile={isMobile}
+        />
 
-        {/* ÁREA SCROLLÁVEL */}
+        {/* CONTEÚDO PRINCIPAL */}
         <div
           style={{
             flex: 1,
             minHeight: 0,
-            overflow: "hidden", // 👈 IMPORTANTE (não deixar scroll geral)
-            padding: "24px 28px",
+            overflow: "hidden",
+            padding: isMobile ? "16px" : "24px 28px",
             display: "flex",
             flexDirection: "column",
           }}
         >
-          {/* PAGE TITLE */}
+          {/* TÍTULO */}
           <div style={{ marginBottom: 20 }}>
             <h1
               style={{
-                fontSize: 20,
+                fontSize: isMobile ? 16 : 20,
                 fontWeight: 700,
                 color: "#f1f5f9",
                 letterSpacing: "-0.03em",
-                lineHeight: 1,
-                marginBottom: 4,
               }}
             >
               Operational Dashboard
             </h1>
             <p
               style={{
-                fontSize: 12.5,
+                fontSize: 12,
                 color: "rgba(148,163,184,0.5)",
-                letterSpacing: "-0.01em",
               }}
             >
               Acompanhe e gerencie todas as tarefas operacionais
@@ -82,7 +125,7 @@ export default function Dashboard() {
 
           {view === "dashboard" && (
             <>
-              {/* SUMMARY (fixo, não some mais) */}
+              {/* SUMMARY */}
               <Summary
                 total={stats.total}
                 pending={stats.pending}
@@ -93,10 +136,10 @@ export default function Dashboard() {
               <div
                 style={{
                   display: "flex",
+                  flexDirection: isMobile ? "column" : "row",
                   gap: 14,
                   flex: 1,
                   minHeight: 0,
-                  marginTop: 16,
                 }}
               >
                 <TaskColumn

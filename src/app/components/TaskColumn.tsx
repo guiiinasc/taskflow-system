@@ -40,26 +40,24 @@ export function TaskColumn({ title, icon, tasks, highlight }: Props) {
     <div
       style={{
         flex: 1,
-        minHeight: 0,
-        height: "100%",
+        minHeight: 0, // 🔥 ESSENCIAL PRA FUNCIONAR O SCROLL
+        display: "flex",
+        flexDirection: "column",
         background: "rgba(255,255,255,0.025)",
         borderRadius: 13,
         padding: "14px 12px",
         border: "1px solid rgba(255,255,255,0.06)",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
       }}
     >
       {/* HEADER */}
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
           marginBottom: 12,
           paddingBottom: 12,
           borderBottom: "1px solid rgba(255,255,255,0.06)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
@@ -85,6 +83,7 @@ export function TaskColumn({ title, icon, tasks, highlight }: Props) {
           </h3>
         </div>
 
+        {/* CONTADOR */}
         <span
           style={{
             fontSize: 11,
@@ -111,11 +110,11 @@ export function TaskColumn({ title, icon, tasks, highlight }: Props) {
         </span>
       </div>
 
-      {/* SCROLL AREA */}
+      {/* LISTA DE TASKS (COM SCROLL) */}
       <div
         style={{
           flex: 1,
-          minHeight: 0,
+          minHeight: 0, // 🔥 ESSENCIAL
           overflowY: "auto",
           display: "flex",
           flexDirection: "column",
@@ -134,7 +133,26 @@ export function TaskColumn({ title, icon, tasks, highlight }: Props) {
               gap: 8,
             }}
           >
-            <span style={{ fontSize: 11.5, color: "rgba(148,163,184,0.25)" }}>
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgba(148,163,184,0.2)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            >
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+              <rect x="9" y="3" width="6" height="4" rx="2" />
+            </svg>
+
+            <span
+              style={{
+                fontSize: 11.5,
+                color: "rgba(148,163,184,0.25)",
+                fontWeight: 500,
+              }}
+            >
               Nenhuma tarefa
             </span>
           </div>
