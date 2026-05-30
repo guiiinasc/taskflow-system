@@ -18,23 +18,39 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      
+    <div style={{ display: "flex", height: "100vh", background: "#0B1120" }}>
+
       {/* SIDEBAR */}
       <Sidebar view="calendar" setView={() => {}} />
 
       {/* CONTEÚDO */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+
         {/* HEADER GLOBAL */}
         <Header filter={filter} setFilter={setFilter} />
 
         {/* CONTEÚDO DO CALENDÁRIO */}
-        <div style={{ flex: 1, display: "flex", padding: 20, gap: 16 }}>
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            padding: "20px 24px 24px",
+            gap: 20,
+            minHeight: 0,
+            overflow: "hidden",
+          }}
+        >
 
-          {/* ESQUERDA */}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
-            
+          {/* ESQUERDA — calendário */}
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+              minWidth: 0,
+            }}
+          >
             <CalendarHeader
               currentDate={currentDate}
               setCurrentDate={setCurrentDate}
@@ -48,7 +64,7 @@ export default function CalendarPage() {
             />
           </div>
 
-          {/* DIREITA */}
+          {/* DIREITA — painel lateral */}
           <CalendarSidePanel
             selectedDate={selectedDate}
             tasks={tasks}
