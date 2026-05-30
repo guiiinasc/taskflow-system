@@ -3,9 +3,10 @@
 type Props = {
   currentDate: Date;
   setCurrentDate: (date: Date) => void;
+  isMobile?: boolean;
 };
 
-export function CalendarHeader({ currentDate, setCurrentDate }: Props) {
+export function CalendarHeader({ currentDate, setCurrentDate, isMobile = false }: Props) {
   const month = currentDate.toLocaleString("pt-BR", {
     month: "long",
     year: "numeric",
@@ -27,17 +28,18 @@ export function CalendarHeader({ currentDate, setCurrentDate }: Props) {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    width: 32,
-    height: 32,
+    width: isMobile ? 30 : 32,
+    height: isMobile ? 30 : 32,
     borderRadius: 8,
     border: "1px solid rgba(255,255,255,0.08)",
     background: "rgba(255,255,255,0.03)",
     color: "#94a3b8",
     cursor: "pointer",
-    fontSize: 13,
+    fontSize: isMobile ? 16 : 14,
     fontFamily: "inherit",
     transition: "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
     lineHeight: 1,
+    flexShrink: 0,
   };
 
   return (
@@ -46,10 +48,11 @@ export function CalendarHeader({ currentDate, setCurrentDate }: Props) {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "14px 18px",
+        padding: isMobile ? "11px 14px" : "14px 18px",
         background: "rgba(255,255,255,0.025)",
         border: "1px solid rgba(255,255,255,0.07)",
         borderRadius: 13,
+        flexShrink: 0,
       }}
     >
       {/* Título do mês */}
@@ -66,7 +69,7 @@ export function CalendarHeader({ currentDate, setCurrentDate }: Props) {
         />
         <h2
           style={{
-            fontSize: 15,
+            fontSize: isMobile ? 13 : 15,
             fontWeight: 600,
             color: "#f1f5f9",
             letterSpacing: "-0.01em",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { CalendarHeader } from "../components/calendar/CalendarHeader";
 import { CalendarGrid } from "../components/calendar/CalendarGrid";
@@ -17,43 +17,118 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const w = window.innerWidth;
+      setIsMobile(w < 768);
+      setIsTablet(w >= 768 && w < 1100);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Fechar menu ao clicar fora no mobile
+  useEffect(() => {
+    if (!menuOpen) return;
+    const close = () => setMenuOpen(false);
+    window.addEventListener("resize", close);
+    return () => window.removeEventListener("resize", close);
+  }, [menuOpen]);
+
   return (
-    <div style={{ display: "flex", height: "100vh", background: "#0B1120" }}>
+    <div
+      style={{
+        display: "flex",
+        height: "100vh",
+        background: "#0B1120",
+        overflow: "hidden",
+      }}
+    >
+      {/* SIDEBAR — desktop e tablet visível, mobile oculto por padrão */}
+      {!isMobile && (
+        <Sidebar view="calendar" setView={() => {}} />
+      )}
 
-      {/* SIDEBAR */}
-      <Sidebar view="calendar" setView={() => {}} />
+      {/* SIDEBAR MOBILE — overlay */}
+      {isMobile && menuOpen && (
+        <>
+          <div
+            onClick={() => setMenuOpen(false)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.55)",
+              zIndex: 20,
+            }}
+          />
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              height: "100%",
+              width: 220,
+              zIndex: 30,
+            }}
+          >
+            <Sidebar view="calendar" setView={() => {}} />
+          </div>
+        </>
+      )}
 
-      {/* CONTEÚDO */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+      {/* CONTEÚDO PRINCIPAL */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+          overflow: "hidden",
+          background: "linear-gradient(160deg, #0F172A 0%, #0B1120 60%, #0d1117 100%)",
+        }}
+      >
+        {/* HEADER */}
+        <Header
+          filter={filter}
+          setFilter={setFilter}
+          onMenuClick={() => setMenuOpen((prev) => !prev)}
+          isMobile={isMobile}
+        />
 
-        {/* HEADER GLOBAL */}
-        <Header filter={filter} setFilter={setFilter} />
-
-        {/* CONTEÚDO DO CALENDÁRIO */}
+        {/* ÁREA DO CALENDÁRIO */}
         <div
           style={{
             flex: 1,
             display: "flex",
-            padding: "20px 24px 24px",
-            gap: 20,
+            flexDirection: isMobile ? "column" : "row",
+            padding: isMobile ? "12px 12px 16px" : isTablet ? "16px 16px 20px" : "20px 24px 24px",
+            gap: isMobile ? 12 : 20,
             minHeight: 0,
-            overflow: "hidden",
+            overflowY: isMobile ? "auto" : "hidden",
+            overflowX: "hidden",
           }}
         >
-
-          {/* ESQUERDA — calendário */}
+          {/* COLUNA ESQUERDA — header + grid */}
           <div
             style={{
               flex: 1,
               display: "flex",
               flexDirection: "column",
-              gap: 16,
+              gap: isMobile ? 10 : 14,
               minWidth: 0,
+              // No mobile, não deixar encolher indefinidamente
+              minHeight: isMobile ? "auto" : 0,
             }}
           >
             <CalendarHeader
               currentDate={currentDate}
               setCurrentDate={setCurrentDate}
+              isMobile={isMobile}
             />
 
             <CalendarGrid
@@ -61,13 +136,18 @@ export default function CalendarPage() {
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
               tasks={tasks}
+              isMobile={isMobile}
+              isTablet={isTablet}
             />
           </div>
 
-          {/* DIREITA — painel lateral */}
+          {/* PAINEL LATERAL — direita no desktop/tablet, abaixo no mobile */}
           <CalendarSidePanel
             selectedDate={selectedDate}
             tasks={tasks}
+            isMobile={isMobile}
+            isTablet={isTablet}
+            filter={filter}
           />
         </div>
       </div>
