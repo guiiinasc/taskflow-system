@@ -8,6 +8,8 @@ import { CalendarSidePanel } from "../components/calendar/CalendarSidePanel";
 
 import { Sidebar } from "../components/Sidebar";
 import { Header } from "../components/Header";
+import { NewTaskModal } from "../components/modals/NewTaskModal";
+import { useNewTaskModal } from "../hooks/useNewTaskModal";
 
 import { useTasks } from "../hooks/useTasks";
 
@@ -20,6 +22,8 @@ export default function CalendarPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const { isOpen, open, close } = useNewTaskModal();
 
   useEffect(() => {
     const handleResize = () => {
@@ -51,7 +55,7 @@ export default function CalendarPage() {
     >
       {/* SIDEBAR — desktop e tablet visível, mobile oculto por padrão */}
       {!isMobile && (
-        <Sidebar view="calendar" setView={() => {}} />
+        <Sidebar view="calendar" setView={() => {}} onNewTask={open} />
       )}
 
       {/* SIDEBAR MOBILE — overlay */}
@@ -76,7 +80,7 @@ export default function CalendarPage() {
               zIndex: 30,
             }}
           >
-            <Sidebar view="calendar" setView={() => {}} />
+            <Sidebar view="calendar" setView={() => {}} onNewTask={open} />
           </div>
         </>
       )}
@@ -150,7 +154,13 @@ export default function CalendarPage() {
             filter={filter}
           />
         </div>
-      </div>
-    </div>
+      </div>      <NewTaskModal
+        isOpen={isOpen}
+        onClose={close}
+        onCreate={(task) => {
+          console.log("Nova task:", task);
+          close();
+        }}
+      />    </div>
   );
 }

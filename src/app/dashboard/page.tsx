@@ -4,6 +4,8 @@ import { Sidebar } from "../components/Sidebar";
 import { Header } from "../components/Header";
 import { Summary } from "../components/Summary";
 import { TaskColumn } from "../components/TaskColumn";
+import { NewTaskModal } from "../components/modals/NewTaskModal";
+import { useNewTaskModal } from "../hooks/useNewTaskModal";
 
 import { useTasks } from "../hooks/useTasks";
 import { groupTasks, getTaskStats } from "../features/tasks/task.utils";
@@ -18,6 +20,8 @@ export default function Dashboard() {
 
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const { isOpen, open, close } = useNewTaskModal();
 
   useEffect(() => {
     const handleResize = () => {
@@ -39,9 +43,15 @@ export default function Dashboard() {
       }}
     >
       {/* SIDEBAR DESKTOP */}
-      {!isMobile && <Sidebar view={view} setView={setView} />}
+      {!isMobile && (
+        <Sidebar
+          view={view}
+          setView={setView}
+          onNewTask={open} // 👈 AQUI
+        />
+      )}
 
-      {/* SIDEBAR MOBILE (OVERLAY) */}
+      {/* SIDEBAR MOBILE */}
       {isMobile && menuOpen && (
         <>
           {/* BACKDROP */}
@@ -66,7 +76,11 @@ export default function Dashboard() {
               zIndex: 30,
             }}
           >
-            <Sidebar view={view} setView={setView} />
+            <Sidebar
+              view={view}
+              setView={setView}
+              onNewTask={open} // 👈 AQUI TAMBÉM
+            />
           </div>
         </>
       )}
@@ -90,7 +104,7 @@ export default function Dashboard() {
           isMobile={isMobile}
         />
 
-        {/* CONTEÚDO PRINCIPAL */}
+        {/* MAIN */}
         <div
           style={{
             flex: 1,
@@ -101,7 +115,7 @@ export default function Dashboard() {
             flexDirection: "column",
           }}
         >
-          {/* TÍTULO */}
+          {/* TITLE */}
           <div style={{ marginBottom: 20 }}>
             <h1
               style={{
@@ -125,14 +139,12 @@ export default function Dashboard() {
 
           {view === "dashboard" && (
             <>
-              {/* SUMMARY */}
               <Summary
                 total={stats.total}
                 pending={stats.pending}
                 completed={stats.completed}
               />
 
-              {/* COLUNAS */}
               <div
                 style={{
                   display: "flex",
@@ -167,6 +179,16 @@ export default function Dashboard() {
               <h2>Calendário</h2>
             </div>
           )}
+
+          {/* MODAL */}
+          <NewTaskModal
+            isOpen={isOpen}
+            onClose={close}
+            onCreate={(task) => {
+              console.log("Nova task:", task);
+              close(); // 👈 fecha automático
+            }}
+          />
         </div>
       </div>
     </div>

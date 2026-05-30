@@ -6,9 +6,10 @@ import { MenuItem } from "./MenuItem";
 type Props = {
   view: "dashboard" | "calendar";
   setView: (view: "dashboard" | "calendar") => void;
+  onNewTask?: () => void;
 };
 
-export function Sidebar({ view, setView }: Props) {
+export function Sidebar({ view, setView, onNewTask }: Props) {
   return (
     <div
       style={{
@@ -142,6 +143,7 @@ export function Sidebar({ view, setView }: Props) {
             (e.currentTarget as HTMLButtonElement).style.borderColor =
               "rgba(255,255,255,0.18)";
           }}
+          onClick={onNewTask}
           onMouseLeave={e => {
             (e.currentTarget as HTMLButtonElement).style.background =
               "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)";
@@ -150,52 +152,52 @@ export function Sidebar({ view, setView }: Props) {
           }}
         >
           <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
-          Nova Task
+          <span>Nova Task</span>
         </button>
 
-        {/* DIVIDER */}
-        <div style={{ height: 1, background: "rgba(255,255,255,0.07)", marginBottom: 14 }} />
+          {/* DIVIDER */}
+          <div style={{ height: 1, background: "rgba(255,255,255,0.07)", marginBottom: 14 }} />
 
-        {/* USUÁRIO */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "8px 10px",
-            borderRadius: 10,
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.06)",
-            cursor: "pointer",
-          }}
-        >
+          {/* USUÁRIO */}
           <div
             style={{
-              width: 32,
-              height: 32,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #475569, #334155)",
-              border: "2px solid rgba(255,255,255,0.1)",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              fontSize: 12,
-              fontWeight: 700,
-              color: "#e2e8f0",
+              gap: 10,
+              padding: "8px 10px",
+              borderRadius: 10,
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              cursor: "pointer",
             }}
           >
-            G
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #475569, #334155)",
+                border: "2px solid rgba(255,255,255,0.1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                fontSize: 12,
+                fontWeight: 700,
+                color: "#e2e8f0",
+              }}
+            >
+              G
+            </div>
+            <div style={{ overflow: "hidden" }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: "#f1f5f9" }}>
+                Guilherme
+              </p>
+              <p style={{ fontSize: 10, color: "rgba(148,163,184,0.6)" }}>
+                Operations Leader
+              </p>
+            </div>
           </div>
-          <div style={{ overflow: "hidden" }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: "#f1f5f9" }}>
-              Guilherme
-            </p>
-            <p style={{ fontSize: 10, color: "rgba(148,163,184,0.6)" }}>
-              Operations Leader
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   );
