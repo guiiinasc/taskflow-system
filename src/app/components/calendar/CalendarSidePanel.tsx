@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { parseDateLocal } from "../../lib/date";
@@ -13,23 +13,18 @@ type Props = {
   filter?: FilterType;
 };
 
-// ─── Helpers de status ──────────────────────────────────────────────────────
-
 function getStatusStyle(status: string): { bg: string; color: string; label: string } {
   const s = status?.toLowerCase() ?? "";
-  if (s === "pending")   return { bg: "rgba(251,191,36,0.14)",  color: "#fbbf24", label: "Pendente" };
-  if (s === "completed") return { bg: "rgba(74,222,128,0.14)",  color: "#4ade80", label: "Concluído" };
-  if (s === "priority")  return { bg: "rgba(248,113,113,0.14)", color: "#f87171", label: "Prioridade" };
+  if (s === "pendente") return { bg: "rgba(248,113,113,0.14)", color: "#f87171", label: "Pendente" };
+  if (s === "concluido") return { bg: "rgba(74,222,128,0.14)", color: "#4ade80", label: "Concluído" };
   return { bg: "rgba(56,189,248,0.12)", color: "#38bdf8", label: "Em andamento" };
 }
 
 function getFilterBadge(filter: FilterType): { label: string; bg: string; color: string } {
-  if (filter === "pendente")  return { label: "Pendentes",   bg: "rgba(251,191,36,0.12)",  color: "#fbbf24" };
-  if (filter === "concluido") return { label: "Concluídos",  bg: "rgba(74,222,128,0.12)",  color: "#4ade80" };
-  return                              { label: "Todas",       bg: "rgba(148,163,184,0.08)", color: "rgba(148,163,184,0.7)" };
+  if (filter === "pendente") return { label: "Pendentes", bg: "rgba(251,191,36,0.12)", color: "#fbbf24" };
+  if (filter === "concluido") return { label: "Concluídos", bg: "rgba(74,222,128,0.12)", color: "#4ade80" };
+  return { label: "Todas", bg: "rgba(148,163,184,0.08)", color: "rgba(148,163,184,0.7)" };
 }
-
-// ─── Ícones ──────────────────────────────────────────────────────────────────
 
 function IconClock() {
   return (
@@ -59,8 +54,6 @@ function IconCalendar() {
   );
 }
 
-// ─── CSS de animações (injetado uma vez) ─────────────────────────────────────
-
 const ANIM_STYLE = `
   @keyframes _sfp_fadeSlideIn {
     from { opacity: 0; transform: translateY(10px); }
@@ -82,8 +75,6 @@ function useInjectStyles() {
     document.head.appendChild(el);
   }, []);
 }
-
-// ─── Estado vazio (nenhum dia selecionado) ────────────────────────────────────
 
 function EmptyPrompt({ isMobile }: { isMobile: boolean }) {
   return (
@@ -124,8 +115,6 @@ function EmptyPrompt({ isMobile }: { isMobile: boolean }) {
   );
 }
 
-// ─── Card individual de task ──────────────────────────────────────────────────
-
 function TaskCard({
   task,
   index,
@@ -138,8 +127,20 @@ function TaskCard({
   animKey: string;
 }) {
   const [hovered, setHovered] = useState(false);
-  const { bg, color, label } = getStatusStyle(task?.status ?? "");
-  const isCompleted = task?.status?.toLowerCase() === "completed";
+  const status = getStatusStyle(task?.status ?? "");
+  const typeLabel =
+    task?.type === "outro"
+      ? task?.customType || "Outro"
+      : task?.type === "entrega"
+      ? "Entrega"
+      : "Manutenção";
+
+  const secondaryText =
+    task?.type === "entrega"
+      ? task?.quantity != null
+        ? `${task.quantity} unidades`
+        : "Quantidade não definida"
+      : task?.description || "Sem descrição";
 
   return (
     <div
@@ -147,123 +148,128 @@ function TaskCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.03)",
-        border: `1px solid ${hovered ? "rgba(255,255,255,0.11)" : "rgba(255,255,255,0.07)"}`,
-        borderRadius: 10,
-        padding: isMobile ? "10px 12px" : "12px 14px",
+        background: hovered ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.035)",
+        border: `1px solid ${hovered ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.08)"}`,
+        borderRadius: 14,
+        padding: isMobile ? "14px 14px" : "16px 16px",
         display: "flex",
         flexDirection: "column",
-        gap: 6,
+        gap: 10,
         cursor: "default",
         transform: hovered ? "translateY(-2px)" : "translateY(0)",
         boxShadow: hovered
-          ? "0 4px 16px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.04) inset"
-          : "0 1px 0 rgba(255,255,255,0.03) inset",
-        transition: "background 0.15s ease, border-color 0.15s ease, transform 0.18s ease, box-shadow 0.18s ease",
-        // Stagger de entrada
+          ? "0 12px 35px rgba(0,0,0,0.18)"
+          : "0 1px 0 rgba(255,255,255,0.04) inset",
+        transition: "transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease",
         animation: `_sfp_cardIn 220ms ease-out both`,
-        animationDelay: `${index * 40}ms`,
+        animationDelay: `${index * 36}ms`,
       }}
     >
-      {/* Título */}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-        {/* Ícone de status */}
-        <div
-          style={{
-            width: 18,
-            height: 18,
-            borderRadius: 5,
-            background: bg,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color,
-            flexShrink: 0,
-            marginTop: 1,
-          }}
-        >
-          <IconCheck />
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: 12,
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#f8fafc",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.35,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {task?.location ?? "Local desconhecido"}
+          </span>
+          <p
+            style={{
+              fontSize: 12,
+              color: "rgba(148,163,184,0.75)",
+              lineHeight: 1.5,
+              margin: 0,
+              minHeight: 18,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {secondaryText}
+          </p>
         </div>
-        <p
+
+        <span
           style={{
-            fontSize: 13,
-            fontWeight: 600,
-            color: isCompleted ? "rgba(148,163,184,0.55)" : "#e2e8f0",
-            lineHeight: 1.35,
-            margin: 0,
-            textDecoration: isCompleted ? "line-through" : "none",
-            flex: 1,
+            fontSize: 10,
+            fontWeight: 700,
+            color: "#cbd5e1",
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 999,
+            padding: "6px 10px",
+            textTransform: "capitalize",
+            whiteSpace: "nowrap",
           }}
         >
-          {task?.title ?? "Tarefa"}
-        </p>
+          {typeLabel}
+        </span>
       </div>
 
-      {/* Descrição opcional */}
-      {task?.description && (
-        <p
-          style={{
-            fontSize: 11,
-            fontWeight: 400,
-            color: "rgba(148,163,184,0.5)",
-            lineHeight: 1.5,
-            margin: "0 0 0 26px",
-          }}
-        >
-          {task.description}
-        </p>
-      )}
-
-      {/* Rodapé: metadata + badge */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: 10,
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          paddingTop: 10,
           marginTop: 2,
-          gap: 8,
-          paddingLeft: 26,
         }}
       >
-        {/* Esquerda: horário */}
-        {task?.time ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              color: "rgba(148,163,184,0.38)",
-              fontSize: 11,
-            }}
-          >
-            <IconClock />
-            <span>{task.time}</span>
-          </div>
-        ) : (
-          <div />
-        )}
-
-        {/* Direita: badge */}
         <span
           style={{
-            fontSize: 10,
-            fontWeight: 600,
-            background: bg,
-            color,
-            borderRadius: 5,
-            padding: "2px 7px",
-            letterSpacing: "0.03em",
-            flexShrink: 0,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            color: "rgba(148,163,184,0.65)",
+            fontSize: 11,
+            fontWeight: 500,
           }}
         >
-          {label}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
+            <path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2" />
+          </svg>
+          #{task?.id ?? "?"}
+        </span>
+
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            color: status.color,
+            background: status.bg,
+            borderRadius: 999,
+            padding: "5px 9px",
+            fontSize: 10,
+            fontWeight: 600,
+            textTransform: "capitalize",
+          }}
+        >
+          {task?.status?.toLowerCase() === "concluido" ? <IconCheck /> : <IconClock />}
+          {status.label}
         </span>
       </div>
     </div>
   );
 }
-
-// ─── Componente principal ─────────────────────────────────────────────────────
 
 export function CalendarSidePanel({
   selectedDate,
@@ -274,7 +280,6 @@ export function CalendarSidePanel({
 }: Props) {
   useInjectStyles();
 
-  // Chave de animação: muda quando o dia selecionado muda, disparando re-animação
   const [animKey, setAnimKey] = useState("");
   const prevDateRef = useRef<string>("");
 
@@ -288,29 +293,32 @@ export function CalendarSidePanel({
 
   if (!selectedDate) return <EmptyPrompt isMobile={isMobile} />;
 
-  // Filtrar tasks do dia
   const dayTasks = tasks.filter((t: any) => {
     if (!t?.date) return false;
     const d = parseDateLocal(t.date);
     return d.toDateString() === selectedDate.toDateString();
   });
 
-  // Aplicar filtro global
   const filteredTasks = dayTasks.filter((t: any) => {
-    if (filter === "pendente")  return t?.status?.toLowerCase() === "pendente";
+    if (filter === "pendente") return t?.status?.toLowerCase() === "pendente";
     if (filter === "concluido") return t?.status?.toLowerCase() === "concluido";
     return true;
   });
 
-  const weekday   = selectedDate.toLocaleString("pt-BR", { weekday: "long" });
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    const order: Record<string, number> = { pendente: 0, concluido: 1 };
+    return (order[a?.status] ?? 2) - (order[b?.status] ?? 2);
+  });
+
+  const weekday = selectedDate.toLocaleString("pt-BR", { weekday: "long" });
   const dateLabel = selectedDate.toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "long",
     year: "numeric",
   });
 
-  const today    = new Date();
-  const isToday  = today.toDateString() === selectedDate.toDateString();
+  const today = new Date();
+  const isToday = today.toDateString() === selectedDate.toDateString();
   const filterBadge = getFilterBadge(filter);
 
   const panelWidth = isMobile ? "100%" : isTablet ? 240 : 288;
@@ -327,11 +335,9 @@ export function CalendarSidePanel({
         flexDirection: "column",
         overflow: "hidden",
         maxHeight: isMobile ? 420 : undefined,
-        // Animação do painel inteiro ao trocar de dia
         animation: animKey ? "_sfp_fadeSlideIn 200ms ease-out both" : undefined,
       }}
     >
-      {/* ── Cabeçalho fixo ───────────────────────────────────────────────── */}
       <div
         style={{
           padding: isMobile ? "14px 16px 13px" : "16px 18px 14px",
@@ -340,7 +346,6 @@ export function CalendarSidePanel({
           flexShrink: 0,
         }}
       >
-        {/* Linha 1: weekday + badge Hoje */}
         <div
           style={{
             display: "flex",
@@ -377,7 +382,6 @@ export function CalendarSidePanel({
           )}
         </div>
 
-        {/* Linha 2: data */}
         <h3
           style={{
             fontSize: isMobile ? 14 : 15,
@@ -390,7 +394,6 @@ export function CalendarSidePanel({
           {dateLabel}
         </h3>
 
-        {/* Linha 3: count + filtro ativo */}
         <div
           style={{
             display: "flex",
@@ -399,7 +402,6 @@ export function CalendarSidePanel({
             gap: 8,
           }}
         >
-          {/* Count */}
           <span
             style={{
               fontSize: 11,
@@ -417,10 +419,10 @@ export function CalendarSidePanel({
                 minWidth: 18,
                 height: 18,
                 borderRadius: 5,
-                background: filteredTasks.length > 0
+                background: sortedTasks.length > 0
                   ? "rgba(56,189,248,0.1)"
                   : "rgba(255,255,255,0.04)",
-                color: filteredTasks.length > 0
+                color: sortedTasks.length > 0
                   ? "#38bdf8"
                   : "rgba(148,163,184,0.3)",
                 fontSize: 10,
@@ -428,17 +430,16 @@ export function CalendarSidePanel({
                 padding: "0 4px",
               }}
             >
-              {filteredTasks.length}
+              {sortedTasks.length}
             </span>
-            {filteredTasks.length === 1 ? "tarefa" : "tarefas"}
-            {dayTasks.length !== filteredTasks.length && (
+            {sortedTasks.length === 1 ? "tarefa" : "tarefas"}
+            {dayTasks.length !== sortedTasks.length && (
               <span style={{ color: "rgba(148,163,184,0.3)" }}>
                 de {dayTasks.length}
               </span>
             )}
           </span>
 
-          {/* Filtro ativo */}
           <span
             style={{
               fontSize: 10,
@@ -456,7 +457,6 @@ export function CalendarSidePanel({
         </div>
       </div>
 
-      {/* ── Lista scrollável ──────────────────────────────────────────────── */}
       <div
         style={{
           flex: 1,
@@ -465,12 +465,10 @@ export function CalendarSidePanel({
           display: "flex",
           flexDirection: "column",
           gap: isMobile ? 7 : 8,
-          // Scroll suave
           scrollBehavior: "smooth",
         }}
       >
-        {filteredTasks.length === 0 ? (
-          /* Estado vazio dentro do painel */
+        {sortedTasks.length === 0 ? (
           <div
             style={{
               flex: 1,
@@ -508,8 +506,7 @@ export function CalendarSidePanel({
             </p>
           </div>
         ) : (
-          /* Cards com animação stagger por animKey */
-          filteredTasks.map((task: any, i: number) => (
+          sortedTasks.map((task: any, i: number) => (
             <TaskCard
               key={(task?.id ?? i) + animKey}
               task={task}

@@ -4,20 +4,36 @@ type Props = {
   task: Task;
 };
 
-const typeConfig: Record<string, { bg: string; color: string; border: string }> = {
+// 🎨 CONFIG TYPE
+const typeConfig: Record<
+  string,
+  { bg: string; color: string; border: string; label: string }
+> = {
   entrega: {
     bg: "rgba(14, 165, 233, 0.1)",
     color: "#38bdf8",
     border: "rgba(14, 165, 233, 0.2)",
+    label: "Entrega",
   },
   manutencao: {
     bg: "rgba(251, 146, 60, 0.1)",
     color: "#fb923c",
     border: "rgba(251, 146, 60, 0.2)",
+    label: "Manutenção",
+  },
+  outro: {
+    bg: "rgba(167, 139, 250, 0.1)",
+    color: "#a78bfa",
+    border: "rgba(167, 139, 250, 0.2)",
+    label: "Outro",
   },
 };
 
-const statusConfig: Record<string, { color: string; bg: string; border: string; label: string }> = {
+// 🎯 STATUS
+const statusConfig: Record<
+  string,
+  { color: string; bg: string; border: string; label: string }
+> = {
   pendente: {
     color: "#fca5a5",
     bg: "rgba(239, 68, 68, 0.1)",
@@ -38,10 +54,31 @@ const statusConfig: Record<string, { color: string; bg: string; border: string; 
   },
 };
 
+// 🧠 SUBTITLE INTELIGENTE
+function getSubtitle(task: Task) {
+  if (task.type === "entrega") {
+    if (task.quantity) return `${task.quantity} pacotes`;
+    return "Entrega programada";
+  }
+
+  if (task.type === "manutencao") {
+    return task.description || "Manutenção geral";
+  }
+
+  if (task.type === "outro") {
+    return task.customType || "Outro";
+  }
+
+  return "";
+}
+
 export function TaskCard({ task }: Props) {
   const isCompleted = task.status === "concluido";
-  const type = typeConfig[task.type] ?? typeConfig["entrega"];
+
+  const type = typeConfig[task.type] ?? typeConfig["outro"];
   const status = statusConfig[task.status] ?? statusConfig["pendente"];
+
+  const subtitle = getSubtitle(task);
 
   return (
     <div
@@ -60,43 +97,40 @@ export function TaskCard({ task }: Props) {
         overflow: "hidden",
         flexShrink: 0,
       }}
-      onMouseEnter={e => {
+      onMouseEnter={(e) => {
         if (!isCompleted) {
-          (e.currentTarget as HTMLDivElement).style.background =
-            "rgba(255,255,255,0.07)";
-          (e.currentTarget as HTMLDivElement).style.borderColor =
-            "rgba(255,255,255,0.12)";
-          (e.currentTarget as HTMLDivElement).style.transform = "translateY(-1px)";
-          (e.currentTarget as HTMLDivElement).style.boxShadow =
-            "0 4px 20px rgba(0,0,0,0.25)";
+          const el = e.currentTarget;
+          el.style.background = "rgba(255,255,255,0.07)";
+          el.style.borderColor = "rgba(255,255,255,0.12)";
+          el.style.transform = "translateY(-1px)";
+          el.style.boxShadow = "0 4px 20px rgba(0,0,0,0.25)";
         }
       }}
-      onMouseLeave={e => {
-        (e.currentTarget as HTMLDivElement).style.background = isCompleted
+      onMouseLeave={(e) => {
+        const el = e.currentTarget;
+        el.style.background = isCompleted
           ? "rgba(255,255,255,0.02)"
           : "rgba(255,255,255,0.04)";
-        (e.currentTarget as HTMLDivElement).style.borderColor =
-          "rgba(255,255,255,0.07)";
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-        (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
+        el.style.borderColor = "rgba(255,255,255,0.07)";
+        el.style.transform = "translateY(0)";
+        el.style.boxShadow = "none";
       }}
     >
-      {/* Borda colorida esquerda para itens urgentes */}
-      {task.status === "pendente" && !isCompleted && (
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            top: "15%",
-            bottom: "15%",
-            width: 3,
-            borderRadius: "0 3px 3px 0",
-            background: "linear-gradient(180deg, #ef4444, #f97316)",
-          }}
-        />
-      )}
+      {/* 🎨 BARRA LATERAL POR TIPO */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          top: "15%",
+          bottom: "15%",
+          width: 3,
+          borderRadius: "0 3px 3px 0",
+          background: type.color,
+          opacity: 0.8,
+        }}
+      />
 
-      {/* TOPO: tipo + urgente */}
+      {/* TOPO */}
       <div
         style={{
           display: "flex",
@@ -115,13 +149,15 @@ export function TaskCard({ task }: Props) {
             color: type.color,
             border: `1px solid ${type.border}`,
             letterSpacing: "0.03em",
-            textTransform: "capitalize",
           }}
         >
-          {task.type === "outro" ? task.customType ?? "Outro" : task.type}
+          {task.type === "outro"
+            ? task.customType ?? "Outro"
+            : type.label}
         </span>
 
-        {task.status === "pendente" && (
+        {/* 🚨 PRIORIDADE (CORRETO AGORA) */}
+        {task.priority === "urgente" && (
           <span
             style={{
               fontSize: 10.5,
@@ -130,15 +166,14 @@ export function TaskCard({ task }: Props) {
               display: "flex",
               alignItems: "center",
               gap: 3,
-              letterSpacing: "0.01em",
             }}
           >
-            <span style={{ fontSize: 10 }}>●</span> urgente
+            ● urgente
           </span>
         )}
       </div>
 
-      {/* TÍTULO */}
+      {/* LOCATION */}
       <h3
         style={{
           fontSize: 13.5,
@@ -153,7 +188,7 @@ export function TaskCard({ task }: Props) {
         {task.location}
       </h3>
 
-      {/* SUBTÍTULO */}
+      {/* SUBTITLE + TIME */}
       <p
         style={{
           fontSize: 11.5,
@@ -162,14 +197,11 @@ export function TaskCard({ task }: Props) {
           marginBottom: 11,
         }}
       >
-        {task.type === "entrega"
-          ? task.quantity != null
-            ? `${task.quantity} unidades`
-            : "Quantidade não definida"
-          : task.description || "Manutenção geral"}
+        {subtitle}
+        {task.time && ` • ${task.time}`}
       </p>
 
-      {/* RODAPÉ */}
+      {/* FOOTER */}
       <div
         style={{
           display: "flex",
@@ -179,7 +211,7 @@ export function TaskCard({ task }: Props) {
           borderTop: "1px solid rgba(255,255,255,0.06)",
         }}
       >
-        {/* ÍCONE + ID */}
+        {/* ICON + ID */}
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <svg
             width="12"
@@ -200,12 +232,19 @@ export function TaskCard({ task }: Props) {
               </>
             )}
           </svg>
-          <span style={{ fontSize: 11, color: "rgba(148,163,184,0.45)", fontWeight: 500 }}>
+
+          <span
+            style={{
+              fontSize: 11,
+              color: "rgba(148,163,184,0.45)",
+              fontWeight: 500,
+            }}
+          >
             #{task.id}
           </span>
         </div>
 
-        {/* STATUS BADGE */}
+        {/* STATUS */}
         <span
           style={{
             fontSize: 10.5,
@@ -216,7 +255,6 @@ export function TaskCard({ task }: Props) {
             color: status.color,
             border: `1px solid ${status.border}`,
             letterSpacing: "0.01em",
-            textTransform: "capitalize",
           }}
         >
           {status.label}

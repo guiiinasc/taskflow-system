@@ -34,3 +34,64 @@ export function getTaskStats(tasks: Task[]) {
 
   return { total, pending, completed };
 }
+
+export function getTaskSubtitle(task: Task) {
+  if (task.type === "entrega") {
+    if (task.quantity) return `${task.quantity} pacotes`;
+    return "Entrega";
+  }
+
+  if (task.type === "manutencao") {
+    if (task.description) return task.description;
+    return "Manutenção";
+  }
+
+  if (task.type === "outro") {
+    if (task.customType) return task.customType;
+    return "Outro";
+  }
+
+  return "";
+}
+
+export function getTaskTypeMeta(task: Task) {
+  switch (task.type) {
+    case "entrega":
+      return {
+        label: "ENTREGA",
+        color: "#38bdf8",
+      };
+
+    case "manutencao":
+      return {
+        label: "MANUTENÇÃO",
+        color: "#facc15",
+      };
+
+    case "outro":
+      return {
+        label: "OUTRO",
+        color: "#a78bfa",
+      };
+
+    default:
+      return {
+        label: "TASK",
+        color: "#94a3b8",
+      };
+  }
+}
+
+export function getTaskStatusMeta(task: Task) {
+  if (task.status === "concluido") {
+    return {
+      label: "Concluído",
+      color: "#22c55e",
+    };
+  }
+
+  return {
+    label: "Pendente",
+    color: "#f59e0b",
+  };
+}
