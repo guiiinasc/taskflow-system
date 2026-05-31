@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { parseDateLocal } from "../../lib/date";
 
 type Props = {
   date: Date;
@@ -35,7 +36,8 @@ export function CalendarDayCell({
 
   const dayTasks = tasks.filter((t: any) => {
     if (!t?.date) return false;
-    return new Date(t.date).toDateString() === date.toDateString();
+    const d = parseDateLocal(t.date);
+    return d.toDateString() === date.toDateString();
   });
 
   // Mobile mostra 0 pills (só dot), tablet/desktop mostra até 2

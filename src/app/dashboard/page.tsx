@@ -12,7 +12,7 @@ import { groupTasks, getTaskStats } from "../features/tasks/task.utils";
 import { useEffect, useState } from "react";
 
 export default function Dashboard() {
-  const { tasks, allTasks, filter, setFilter } = useTasks();
+  const { tasks, allTasks, filter, setFilter, addTask } = useTasks();
   const [view, setView] = useState<"dashboard" | "calendar">("dashboard");
 
   const grouped = groupTasks(tasks);
@@ -186,6 +186,7 @@ export default function Dashboard() {
             onClose={close}
             onCreate={(task) => {
               console.log("Nova task:", task);
+              addTask(task);
               close(); // 👈 fecha automático
             }}
           />

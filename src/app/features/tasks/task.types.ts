@@ -4,13 +4,14 @@ export type TaskStatus =
   | "concluido"
   | "cancelado";
 
-export type TaskType = "entrega" | "manutencao";
+export type TaskType = "entrega" | "manutencao" | "outro";
 
 export interface Task {
-  id: string;
+  id: string | number;
   location: string;
-  quantity?: number; 
-  description?: string; 
+  quantity?: number;
+  description?: string;
+  customType?: string;
   date: string;
   time?: string;
   type: TaskType;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { parseDateLocal } from "../../lib/date";
 
 type FilterType = "todas" | "pendente" | "concluido";
 
@@ -290,13 +291,14 @@ export function CalendarSidePanel({
   // Filtrar tasks do dia
   const dayTasks = tasks.filter((t: any) => {
     if (!t?.date) return false;
-    return new Date(t.date).toDateString() === selectedDate.toDateString();
+    const d = parseDateLocal(t.date);
+    return d.toDateString() === selectedDate.toDateString();
   });
 
   // Aplicar filtro global
   const filteredTasks = dayTasks.filter((t: any) => {
-    if (filter === "pendente")  return t?.status?.toLowerCase() === "pending";
-    if (filter === "concluido") return t?.status?.toLowerCase() === "completed";
+    if (filter === "pendente")  return t?.status?.toLowerCase() === "pendente";
+    if (filter === "concluido") return t?.status?.toLowerCase() === "concluido";
     return true;
   });
 

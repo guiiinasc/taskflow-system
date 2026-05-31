@@ -1,18 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import type { Task } from "../../features/tasks/task.types";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 type TaskStatus = "pendente" | "concluido";
 
 type TaskType = "entrega" | "manutencao" | "outro";
 
-type NewTask = {
-  title: string;
-  description?: string;
-  date: string;
-  status: TaskStatus;
+type NewTask = Omit<Task, "id"> & {
   type: TaskType;
   customType?: string;
 };
@@ -135,24 +132,26 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
   useInjectModalStyles();
 
   // Form state
-  const [title,       setTitle]       = useState("");
+  const [location,    setLocation]    = useState("");
   const [description, setDescription] = useState("");
   const [taskType,    setTaskType]    = useState<TaskType>("entrega");
   const [customType,  setCustomType]  = useState("");
+  const [quantity,    setQuantity]    = useState("");
   const [date,        setDate]        = useState(defaultDate);
   const [status,      setStatus]      = useState<TaskStatus>("pendente");
 
   // UI state
-  const [errors,    setErrors]    = useState<{ title?: string; type?: string; customType?: string; date?: string }>({});
+  const [errors,    setErrors]    = useState<{ location?: string; type?: string; customType?: string; quantity?: string; date?: string }>({});
   const [closing,   setClosing]   = useState(false);
-  const [titleFocus, setTitleFocus] = useState(false);
+  const [locationFocus, setLocationFocus] = useState(false);
   const [descFocus,  setDescFocus]  = useState(false);
   const [customTypeFocus, setCustomTypeFocus] = useState(false);
   const [dateFocus,  setDateFocus]  = useState(false);
+  const [quantityFocus, setQuantityFocus] = useState(false);
   const [submitHover, setSubmitHover] = useState(false);
   const [cancelHover, setCancelHover] = useState(false);
 
-  const titleRef = useRef<HTMLInputElement>(null);
+  const locationRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // Sync defaultDate prop
@@ -160,19 +159,20 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
     if (defaultDate) setDate(defaultDate);
   }, [defaultDate]);
 
-  // Autofocus title on open
+  // Autofocus location on open
   useEffect(() => {
     if (isOpen) {
       setClosing(false);
       // Reset form on each open
-      setTitle("");
+      setLocation("");
       setDescription("");
       setTaskType("entrega");
       setCustomType("");
+      setQuantity("");
       setDate(defaultDate);
       setStatus("pendente");
       setErrors({});
-      setTimeout(() => titleRef.current?.focus(), 80);
+      setTimeout(() => locationRef.current?.focus(), 80);
     }
   }, [isOpen, defaultDate]);
 
@@ -202,13 +202,19 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
 
   // Validation
   function validate(): boolean {
-    const newErrors: { title?: string; type?: string; customType?: string; date?: string } = {};
-    if (!title.trim())  newErrors.title = "O título é obrigatório";
-    if (!taskType)      newErrors.type  = "O tipo da task é obrigatório";
+    const newErrors: { location?: string; type?: string; customType?: string; quantity?: string; date?: string } = {};
+    if (!location.trim())  newErrors.location = "O local da task é obrigatório";
+    if (!taskType)         newErrors.type  = "O tipo da task é obrigatório";
     if (taskType === "outro" && !customType.trim()) {
       newErrors.customType = "Descreva o tipo da task";
     }
-    if (!date)          newErrors.date  = "A data é obrigatória";
+    if (taskType === "entrega") {
+      const quantityNumber = Number(quantity);
+      if (!quantity.trim() || Number.isNaN(quantityNumber) || quantityNumber <= 0) {
+        newErrors.quantity = "Informe a quantidade de unidades";
+      }
+    }
+    if (!date)             newErrors.date  = "A data é obrigatória";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -217,8 +223,9 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
   function handleSubmit() {
     if (!validate()) return;
     onCreate({
-      title:       title.trim(),
+      location:    location.trim(),
       description: description.trim() || undefined,
+      quantity:    taskType === "entrega" ? Number(quantity) : undefined,
       date,
       status,
       type: taskType,
@@ -230,7 +237,8 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
   if (!isOpen && !closing) return null;
 
   const isValid =
-    title.trim().length > 0 &&
+    location.trim().length > 0 &&
+    (taskType !== "entrega" || quantity.trim().length > 0) &&
     date.length > 0 &&
     taskType.length > 0 &&
     (taskType !== "outro" || customType.trim().length > 0);
@@ -331,36 +339,36 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
         {/* ── Form ─────────────────────────────────────────────────────── */}
         <div style={{ padding: "20px 20px 0" }}>
 
-          {/* Title */}
+          {/* Location */}
           <div style={{ marginBottom: 16 }}>
-            <FieldLabel>Título <span style={{ color: "#f87171" }}>*</span></FieldLabel>
+            <FieldLabel>Localização <span style={{ color: "#f87171" }}>*</span></FieldLabel>
             <input
-              ref={titleRef}
+              ref={locationRef}
               type="text"
-              value={title}
+              value={location}
               onChange={(e) => {
-                setTitle(e.target.value);
-                if (errors.title) setErrors((p) => ({ ...p, title: undefined }));
+                setLocation(e.target.value);
+                if (errors.location) setErrors((p) => ({ ...p, location: undefined }));
               }}
-              onFocus={() => setTitleFocus(true)}
-              onBlur={() => setTitleFocus(false)}
-              placeholder="Título da tarefa"
+              onFocus={() => setLocationFocus(true)}
+              onBlur={() => setLocationFocus(false)}
+              placeholder="Local da tarefa"
               maxLength={100}
               style={{
                 width: "100%",
                 padding: "10px 12px",
                 borderRadius: TOKEN.radiusSm,
-                border: `1px solid ${errors.title ? TOKEN.borderError : titleFocus ? TOKEN.borderFocus : TOKEN.border}`,
-                background: titleFocus ? TOKEN.bgInputHover : TOKEN.bgInput,
+                border: `1px solid ${errors.location ? TOKEN.borderError : locationFocus ? TOKEN.borderFocus : TOKEN.border}`,
+                background: locationFocus ? TOKEN.bgInputHover : TOKEN.bgInput,
                 color: TOKEN.textPrimary,
                 fontSize: 13,
                 fontFamily: "inherit",
                 outline: "none",
                 transition: "border-color 0.15s ease, background 0.15s ease",
-                boxShadow: titleFocus ? "0 0 0 3px rgba(56,189,248,0.08)" : "none",
+                boxShadow: locationFocus ? "0 0 0 3px rgba(56,189,248,0.08)" : "none",
               }}
             />
-            {errors.title && <FieldError message={errors.title} />}
+            {errors.location && <FieldError message={errors.location} />}
           </div>
 
           {/* Description */}
@@ -448,6 +456,39 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
             </div>
             {errors.type && <FieldError message={errors.type} />}
           </div>
+
+          {taskType === "entrega" && (
+            <div style={{ marginBottom: 16, animation: "_ntm_slideIn 180ms ease-out both" }}>
+              <FieldLabel>Quantidade de unidades <span style={{ color: "#f87171" }}>*</span></FieldLabel>
+              <input
+                type="number"
+                min={1}
+                step={1}
+                value={quantity}
+                onChange={(e) => {
+                  setQuantity(e.target.value);
+                  if (errors.quantity) setErrors((p) => ({ ...p, quantity: undefined }));
+                }}
+                onFocus={() => setQuantityFocus(true)}
+                onBlur={() => setQuantityFocus(false)}
+                placeholder="Número de unidades"
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: TOKEN.radiusSm,
+                  border: `1px solid ${errors.quantity ? TOKEN.borderError : quantityFocus ? TOKEN.borderFocus : TOKEN.border}`,
+                  background: quantityFocus ? TOKEN.bgInputHover : TOKEN.bgInput,
+                  color: TOKEN.textPrimary,
+                  fontSize: 13,
+                  fontFamily: "inherit",
+                  outline: "none",
+                  transition: "border-color 0.15s ease, background 0.15s ease",
+                  boxShadow: quantityFocus ? "0 0 0 3px rgba(56,189,248,0.08)" : "none",
+                }}
+              />
+              {errors.quantity && <FieldError message={errors.quantity} />}
+            </div>
+          )}
 
           {taskType === "outro" && (
             <div

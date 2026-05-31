@@ -118,7 +118,7 @@ export function TaskCard({ task }: Props) {
             textTransform: "capitalize",
           }}
         >
-          {task.type}
+          {task.type === "outro" ? task.customType ?? "Outro" : task.type}
         </span>
 
         {task.status === "pendente" && (
@@ -163,7 +163,9 @@ export function TaskCard({ task }: Props) {
         }}
       >
         {task.type === "entrega"
-          ? `${task.quantity} unidades`
+          ? task.quantity != null
+            ? `${task.quantity} unidades`
+            : "Quantidade não definida"
           : task.description || "Manutenção geral"}
       </p>
 

@@ -14,10 +14,10 @@ import { useNewTaskModal } from "../hooks/useNewTaskModal";
 import { useTasks } from "../hooks/useTasks";
 
 export default function CalendarPage() {
-  const { tasks, filter, setFilter } = useTasks();
+  const { tasks, filter, setFilter, addTask } = useTasks();
 
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
@@ -158,9 +158,10 @@ export default function CalendarPage() {
         isOpen={isOpen}
         onClose={close}
         onCreate={(task) => {
-          console.log("Nova task:", task);
+          addTask(task);
           close();
         }}
-      />    </div>
+      />
+    </div>
   );
 }
