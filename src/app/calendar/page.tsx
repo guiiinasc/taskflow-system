@@ -9,7 +9,9 @@ import { CalendarSidePanel } from "../components/calendar/CalendarSidePanel";
 import { Sidebar } from "../components/Sidebar";
 import { Header } from "../components/Header";
 import { NewTaskModal } from "../components/modals/NewTaskModal";
+import { TaskDetailsModal } from "../components/modals/DetailsTaskModal";
 import { useNewTaskModal } from "../hooks/useNewTaskModal";
+import { useTaskDetailsModal } from "../hooks/useDetailsTaskModal";
 
 import { useTasks } from "../hooks/useTasks";
 
@@ -24,6 +26,12 @@ export default function CalendarPage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const { isOpen, open, close } = useNewTaskModal();
+  const {
+    isOpen: isDetailsOpen,
+    selectedTask,
+    open: openDetails,
+    close: closeDetails,
+  } = useTaskDetailsModal();
 
   useEffect(() => {
     const handleResize = () => {
@@ -152,9 +160,16 @@ export default function CalendarPage() {
             isMobile={isMobile}
             isTablet={isTablet}
             filter={filter}
+            onTaskClick={openDetails}
           />
         </div>
-      </div>      <NewTaskModal
+      </div>
+      <TaskDetailsModal
+        isOpen={isDetailsOpen}
+        task={selectedTask}
+        onClose={closeDetails}
+      />
+      <NewTaskModal
         isOpen={isOpen}
         onClose={close}
         onCreate={(task) => {

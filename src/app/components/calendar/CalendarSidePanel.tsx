@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { parseDateLocal } from "../../lib/date";
+import { useTaskDetailsModal } from "../../hooks/useDetailsTaskModal";
+import { TaskDetailsModal } from "../modals/DetailsTaskModal";
+import { Task } from "../../features/tasks/task.types";
 
 type FilterType = "todas" | "pendente" | "concluido";
 
@@ -11,6 +14,7 @@ type Props = {
   isMobile?: boolean;
   isTablet?: boolean;
   filter?: FilterType;
+  onTaskClick?: (task: any) => void;
 };
 
 function getStatusStyle(status: string): { bg: string; color: string; label: string } {
@@ -120,11 +124,13 @@ function TaskCard({
   index,
   isMobile,
   animKey,
+  onClick
 }: {
   task: any;
   index: number;
   isMobile: boolean;
   animKey: string;
+  onClick?: (task: any) => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const status = getStatusStyle(task?.status ?? "");
@@ -132,8 +138,8 @@ function TaskCard({
     task?.type === "outro"
       ? task?.customType || "Outro"
       : task?.type === "entrega"
-      ? "Entrega"
-      : "Manutenção";
+        ? "Entrega"
+        : "Manutenção";
 
   const secondaryText =
     task?.type === "entrega"
@@ -145,6 +151,7 @@ function TaskCard({
   return (
     <div
       key={animKey + index}
+      onClick={() => onClick?.(task)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -155,7 +162,7 @@ function TaskCard({
         display: "flex",
         flexDirection: "column",
         gap: 10,
-        cursor: "default",
+        cursor: "pointer",
         transform: hovered ? "translateY(-2px)" : "translateY(0)",
         boxShadow: hovered
           ? "0 12px 35px rgba(0,0,0,0.18)"
@@ -277,8 +284,18 @@ export function CalendarSidePanel({
   isMobile = false,
   isTablet = false,
   filter = "todas",
+  onTaskClick,
 }: Props) {
   useInjectStyles();
+
+  const {
+    isOpen: isDetailsOpen,
+    selectedTask,
+    open: openDetails,
+    close: closeDetails
+  } = useTaskDetailsModal();
+
+  const shouldRenderInternalDetails = !onTaskClick;
 
   const [animKey, setAnimKey] = useState("");
   const prevDateRef = useRef<string>("");
@@ -513,8 +530,17 @@ export function CalendarSidePanel({
               index={i}
               isMobile={isMobile}
               animKey={animKey}
+              onClick={onTaskClick ?? openDetails}
             />
           ))
+        )}
+
+        {shouldRenderInternalDetails && (
+          <TaskDetailsModal
+            isOpen={isDetailsOpen}
+            task={selectedTask}
+            onClose={closeDetails}
+          />
         )}
       </div>
     </div>
