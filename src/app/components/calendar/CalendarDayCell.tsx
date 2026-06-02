@@ -21,6 +21,12 @@ function getTaskPillColor(task: any): { bg: string; color: string } {
   if (status === "concluido")
     return { bg: "rgba(34,197,94,0.15)", color: "#86efac" };
 
+  if (status === "em_andamento")
+    return { bg: "rgba(59,130,246,0.15)", color: "#93c5fd" };
+
+  if (status === "cancelado")
+    return { bg: "rgba(156,163,175,0.12)", color: "#9ca3af" };
+
   return { bg: "rgba(56,189,248,0.12)", color: "#38bdf8" };
 }
 
@@ -129,8 +135,8 @@ export function CalendarDayCell({
             color: isSelected
               ? "#38bdf8"
               : isToday
-              ? "#e2e8f0"
-              : "rgba(148,163,184,0.7)",
+                ? "#e2e8f0"
+                : "rgba(148,163,184,0.7)",
             lineHeight: 1,
           }}
         >

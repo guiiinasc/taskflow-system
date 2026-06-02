@@ -7,12 +7,16 @@ import { TaskColumn } from "../components/TaskColumn";
 import { NewTaskModal } from "../components/modals/NewTaskModal";
 import { useNewTaskModal } from "../hooks/useNewTaskModal";
 
+import { useTaskDetailsModal } from "../hooks/useDetailsTaskModal";
+import { TaskDetailsModal } from "../components/modals/DetailsTaskModal";
+
 import { useTasks } from "../hooks/useTasks";
 import { groupTasks, getTaskStats } from "../features/tasks/task.utils";
 import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const { tasks, allTasks, filter, setFilter, addTask } = useTasks();
+
   const [view, setView] = useState<"dashboard" | "calendar">("dashboard");
 
   const grouped = groupTasks(tasks);
@@ -21,7 +25,16 @@ export default function Dashboard() {
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // 🔥 Modal de criação
   const { isOpen, open, close } = useNewTaskModal();
+
+  // 🔥 Modal de detalhes (NOVO)
+  const {
+    isOpen: isDetailsOpen,
+    selectedTask,
+    open: openDetails,
+    close: closeDetails,
+  } = useTaskDetailsModal();
 
   useEffect(() => {
     const handleResize = () => {
@@ -47,14 +60,13 @@ export default function Dashboard() {
         <Sidebar
           view={view}
           setView={setView}
-          onNewTask={open} // 👈 AQUI
+          onNewTask={open}
         />
       )}
 
       {/* SIDEBAR MOBILE */}
       {isMobile && menuOpen && (
         <>
-          {/* BACKDROP */}
           <div
             onClick={() => setMenuOpen(false)}
             style={{
@@ -65,7 +77,6 @@ export default function Dashboard() {
             }}
           />
 
-          {/* MENU */}
           <div
             style={{
               position: "fixed",
@@ -79,7 +90,7 @@ export default function Dashboard() {
             <Sidebar
               view={view}
               setView={setView}
-              onNewTask={open} // 👈 AQUI TAMBÉM
+              onNewTask={open}
             />
           </div>
         </>
@@ -154,21 +165,27 @@ export default function Dashboard() {
                   minHeight: 0,
                 }}
               >
+                {/* 🔥 AQUI É O PONTO PRINCIPAL */}
                 <TaskColumn
                   title="Hoje"
                   icon="📅"
                   tasks={grouped.today}
                   highlight
+                  onTaskClick={openDetails} // 👈 NOVO
                 />
+
                 <TaskColumn
                   title="Amanhã"
                   icon="📆"
                   tasks={grouped.tomorrow}
+                  onTaskClick={openDetails} // 👈 NOVO
                 />
+
                 <TaskColumn
                   title="Próximos"
                   icon="➡️"
                   tasks={grouped.upcoming}
+                  onTaskClick={openDetails} // 👈 NOVO
                 />
               </div>
             </>
@@ -180,15 +197,21 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* MODAL */}
+          {/* MODAL DE CRIAÇÃO */}
           <NewTaskModal
             isOpen={isOpen}
             onClose={close}
             onCreate={(task) => {
-              console.log("Nova task:", task);
               addTask(task);
-              close(); // 👈 fecha automático
+              close();
             }}
+          />
+
+          {/* 🔥 MODAL DE DETALHES (NOVO) */}
+          <TaskDetailsModal
+            isOpen={isDetailsOpen}
+            task={selectedTask}
+            onClose={closeDetails}
           />
         </div>
       </div>

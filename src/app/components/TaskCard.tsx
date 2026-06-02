@@ -2,6 +2,7 @@ import { Task } from "../features/tasks/task.types";
 
 type Props = {
   task: Task;
+  onClick?: (task: Task) => void;
 };
 
 // 🎨 CONFIG TYPE
@@ -46,11 +47,17 @@ const statusConfig: Record<
     border: "rgba(34, 197, 94, 0.2)",
     label: "Concluído",
   },
-  "em andamento": {
+  "em_andamento": {
     color: "#93c5fd",
     bg: "rgba(59, 130, 246, 0.1)",
     border: "rgba(59, 130, 246, 0.2)",
     label: "Em andamento",
+  },
+  cancelado: { 
+    color: "#9ca3af",
+    bg: "rgba(156, 163, 175, 0.1)",
+    border: "rgba(156, 163, 175, 0.2)",
+    label: "Cancelado",
   },
 };
 
@@ -72,12 +79,11 @@ function getSubtitle(task: Task) {
   return "";
 }
 
-export function TaskCard({ task }: Props) {
+export function TaskCard({ task, onClick }: Props) {
   const isCompleted = task.status === "concluido";
 
   const type = typeConfig[task.type] ?? typeConfig["outro"];
-  const status = statusConfig[task.status] ?? statusConfig["pendente"];
-
+  const status = statusConfig[task.status] ?? statusConfig.pendente;
   const subtitle = getSubtitle(task);
 
   return (
@@ -97,6 +103,7 @@ export function TaskCard({ task }: Props) {
         overflow: "hidden",
         flexShrink: 0,
       }}
+      onClick={() => onClick?.(task)}
       onMouseEnter={(e) => {
         if (!isCompleted) {
           const el = e.currentTarget;
@@ -157,7 +164,7 @@ export function TaskCard({ task }: Props) {
         </span>
 
         {/* 🚨 PRIORIDADE (CORRETO AGORA) */}
-        {task.priority === "urgente" && (
+        {task.status === "pendente" && (
           <span
             style={{
               fontSize: 10.5,

@@ -7,6 +7,7 @@ type Props = {
   icon: string;
   tasks: Task[];
   highlight?: boolean;
+  onTaskClick?: (task: Task) => void;
 };
 
 // Ícones SVG por coluna
@@ -33,7 +34,7 @@ const columnIcons: Record<string, React.ReactNode> = {
   ),
 };
 
-export function TaskColumn({ title, icon, tasks, highlight }: Props) {
+export function TaskColumn({ title, icon, tasks, highlight, onTaskClick }: Props) {
   const svgIcon = columnIcons[title];
 
   return (
@@ -158,7 +159,7 @@ export function TaskColumn({ title, icon, tasks, highlight }: Props) {
           </div>
         ) : (
           tasks.map((task) => (
-            <TaskCard key={task.id} task={task} />
+            <TaskCard key={task.id} task={task} onClick={onTaskClick} />
           ))
         )}
       </div>
