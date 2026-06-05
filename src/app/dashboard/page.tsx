@@ -6,6 +6,9 @@ import { Summary } from "../components/Summary";
 import { TaskColumn } from "../components/TaskColumn";
 import { NewTaskModal } from "../components/modals/NewTaskModal";
 import { useNewTaskModal } from "../hooks/useNewTaskModal";
+import { useAuthModal } from "../hooks/useAuthModal";
+import { useAuth } from "../contexts/AuthContext";
+import { AuthModal } from "../components/modals/AuthModal";
 
 import { useTaskDetailsModal } from "../hooks/useDetailsTaskModal";
 import { TaskDetailsModal } from "../components/modals/DetailsTaskModal";
@@ -28,6 +31,15 @@ function formatBrasiliaDateTime(date: Date) {
 export default function Dashboard() {
   const { tasks, allTasks, filter, setFilter, addTask } = useTasks();
 
+  const { user } = useAuth();
+  const {
+    isOpen: isAuthOpen,
+    mode,
+    openLogin,
+    openRegister,
+    close: closeAuth,
+  } = useAuthModal();
+
   const [view, setView] = useState<"dashboard" | "calendar">("dashboard");
   const [brasiliaDateTime, setBrasiliaDateTime] = useState(() =>
     formatBrasiliaDateTime(new Date())
@@ -40,16 +52,20 @@ export default function Dashboard() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   // 🔥 Modal de criação
-  const { isOpen, open, close } = useNewTaskModal();
+  const {
+  isOpen: isNewTaskOpen,
+  open: openNewTask,
+  close: closeNewTask,
+} = useNewTaskModal();
 
   // 🔥 Modal de detalhes (NOVO)
   const {
-    isOpen: isDetailsOpen,
-    selectedTask,
-    open: openDetails,
-    close: closeDetails,
-  } = useTaskDetailsModal();
-
+  isOpen: isDetailsOpen,
+  selectedTask,
+  open: openDetails,
+  close: closeDetails,
+} = useTaskDetailsModal();
+  
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 900);
@@ -82,7 +98,7 @@ export default function Dashboard() {
         <Sidebar
           view={view}
           setView={setView}
-          onNewTask={open}
+          onNewTask={openNewTask}
         />
       )}
 
@@ -112,7 +128,7 @@ export default function Dashboard() {
             <Sidebar
               view={view}
               setView={setView}
-              onNewTask={open}
+              onNewTask={openNewTask}
             />
           </div>
         </>
@@ -232,11 +248,11 @@ export default function Dashboard() {
 
           {/* MODAL DE CRIAÇÃO */}
           <NewTaskModal
-            isOpen={isOpen}
-            onClose={close}
+            isOpen={isNewTaskOpen}
+            onClose={closeNewTask}
             onCreate={(task) => {
               addTask(task);
-              close();
+              closeNewTask();
             }}
           />
 

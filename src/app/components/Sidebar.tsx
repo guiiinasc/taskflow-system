@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { MenuItem } from "./MenuItem";
+import { useAuth } from "../contexts/AuthContext";
+import { useAuthModal } from "../hooks/useAuthModal";
 
 type Props = {
   view: "dashboard" | "calendar";
@@ -158,47 +160,62 @@ export function Sidebar({ view, setView, onNewTask }: Props) {
           {/* DIVIDER */}
           <div style={{ height: 1, background: "rgba(255,255,255,0.07)", marginBottom: 14 }} />
 
-          {/* USUÁRIO */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "8px 10px",
-              borderRadius: 10,
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.06)",
-              cursor: "pointer",
-            }}
-          >
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #475569, #334155)",
-                border: "2px solid rgba(255,255,255,0.1)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-                fontSize: 12,
-                fontWeight: 700,
-                color: "#e2e8f0",
-              }}
-            >
-              G
-            </div>
-            <div style={{ overflow: "hidden" }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: "#f1f5f9" }}>
-                Guilherme
-              </p>
-              <p style={{ fontSize: 10, color: "rgba(148,163,184,0.6)" }}>
-                Operations Leader
-              </p>
-            </div>
-          </div>
+          {/* USUÁRIO / LOGIN */}
+          <AuthArea />
       </div>
     </div>
+  );
+}
+
+function AuthArea() {
+  const { user } = useAuth();
+  const { openLogin, openRegister } = useAuthModal();
+
+  return (
+    <>
+      <div
+        onClick={() => {
+          if (!user) openLogin();
+        }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "8px 10px",
+          borderRadius: 10,
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          cursor: "pointer",
+        }}
+      >
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #475569, #334155)",
+            border: "2px solid rgba(255,255,255,0.1)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            fontSize: 12,
+            fontWeight: 700,
+            color: "#e2e8f0",
+          }}
+        >
+          {user ? user.email.charAt(0).toUpperCase() : "→"}
+        </div>
+        <div style={{ overflow: "hidden" }}>
+          <p style={{ fontSize: 12, fontWeight: 600, color: "#f1f5f9", margin: 0 }}>
+            {user ? user.email : "Entrar"}
+          </p>
+          <p style={{ fontSize: 10, color: "rgba(148,163,184,0.6)", margin: 0 }}>
+            {user ? "Operações" : "Faça login ou registre-se"}
+          </p>
+        </div>
+      </div>
+      
+    </>
   );
 }

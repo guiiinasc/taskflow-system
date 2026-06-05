@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useAuth } from "../contexts/AuthContext";
+import { useAuthModal } from "../hooks/useAuthModal";
 
 type FilterType = "todas" | "pendente" | "concluido";
 
@@ -12,6 +14,8 @@ type Props = {
 };
 
 export function Header({ filter, setFilter, onMenuClick, isMobile }: Props) {
+  const { user } = useAuth();
+  const { openLogin, openRegister } = useAuthModal();
   return (
     <div
       style={{
@@ -199,24 +203,31 @@ export function Header({ filter, setFilter, onMenuClick, isMobile }: Props) {
           );
         })}
 
-        {/* PERFIL (NOVO) */}
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, #475569, #334155)",
-            border: "2px solid rgba(255,255,255,0.1)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 12,
-            fontWeight: 700,
-            color: "#e2e8f0",
-            cursor: "pointer",
-          }}
-        >
-          G
+        {/* PERFIL / LOGIN */}
+        <div>
+          <div
+            onClick={() => {
+              if (!user) openLogin();
+            }}
+            title={user ? user.email : "Entrar"}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #475569, #334155)",
+              border: "2px solid rgba(255,255,255,0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 12,
+              fontWeight: 700,
+              color: "#e2e8f0",
+              cursor: "pointer",
+            }}
+          >
+            {user ? user.email.charAt(0).toUpperCase() : "→"}
+          </div>
+          
         </div>
       </div>
     </div>

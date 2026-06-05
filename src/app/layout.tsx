@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TasksProvider } from "./hooks/useTasks";
+import { AuthProvider } from "./contexts/AuthContext";
+import { AuthModalProvider } from "./hooks/useAuthModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +31,11 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <TasksProvider>{children}</TasksProvider>
+        <AuthProvider>
+          <AuthModalProvider>
+            <TasksProvider>{children}</TasksProvider>
+          </AuthModalProvider>
+        </AuthProvider>
       </body>
     </html>
   );
