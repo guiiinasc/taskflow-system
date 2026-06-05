@@ -14,10 +14,24 @@ import { useTasks } from "../hooks/useTasks";
 import { groupTasks, getTaskStats } from "../features/tasks/task.utils";
 import { useEffect, useState } from "react";
 
+function formatBrasiliaDateTime(date: Date) {
+  return date.toLocaleString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function Dashboard() {
   const { tasks, allTasks, filter, setFilter, addTask } = useTasks();
 
   const [view, setView] = useState<"dashboard" | "calendar">("dashboard");
+  const [brasiliaDateTime, setBrasiliaDateTime] = useState(() =>
+    formatBrasiliaDateTime(new Date())
+  );
 
   const grouped = groupTasks(tasks);
   const stats = getTaskStats(allTasks);
@@ -44,6 +58,14 @@ export default function Dashboard() {
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBrasiliaDateTime(formatBrasiliaDateTime(new Date()));
+    }, 60_000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -141,7 +163,18 @@ export default function Dashboard() {
             <p
               style={{
                 fontSize: 12,
+                color: "rgba(148,163,184,0.65)",
+                margin: 0,
+                marginBottom: 4,
+              }}
+            >
+              Brasília • {brasiliaDateTime}
+            </p>
+            <p
+              style={{
+                fontSize: 12,
                 color: "rgba(148,163,184,0.5)",
+                margin: 0,
               }}
             >
               Acompanhe e gerencie todas as tarefas operacionais

@@ -15,6 +15,10 @@ export function groupTasks(tasks: Task[]) {
   tomorrowDate.setDate(now.getDate() + 1);
   const tomorrow = toLocalDateString(tomorrowDate);
 
+  const upcomingEndDate = new Date(tomorrowDate);
+  upcomingEndDate.setDate(tomorrowDate.getDate() + 5);
+  const upcomingEnd = toLocalDateString(upcomingEndDate);
+
   return {
     // Exatamente hoje
     today: tasks.filter((t) => t.date === today),
@@ -22,8 +26,8 @@ export function groupTasks(tasks: Task[]) {
     // Exatamente amanhã
     tomorrow: tasks.filter((t) => t.date === tomorrow),
 
-    // Apenas datas FUTURAS (depois de amanhã) — passados não aparecem
-    upcoming: tasks.filter((t) => t.date > tomorrow),
+    // Próximos 5 dias depois de amanhã
+    upcoming: tasks.filter((t) => t.date > tomorrow && t.date <= upcomingEnd),
   };
 }
 

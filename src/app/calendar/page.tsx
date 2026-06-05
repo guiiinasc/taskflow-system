@@ -5,27 +5,40 @@ import { useState, useEffect } from "react";
 import { CalendarHeader } from "../components/calendar/CalendarHeader";
 import { CalendarGrid } from "../components/calendar/CalendarGrid";
 import { CalendarSidePanel } from "../components/calendar/CalendarSidePanel";
-
 import { Sidebar } from "../components/Sidebar";
 import { Header } from "../components/Header";
 import { NewTaskModal } from "../components/modals/NewTaskModal";
 import { TaskDetailsModal } from "../components/modals/DetailsTaskModal";
 import { useNewTaskModal } from "../hooks/useNewTaskModal";
 import { useTaskDetailsModal } from "../hooks/useDetailsTaskModal";
-
 import { useTasks } from "../hooks/useTasks";
+import { toLocalDateString } from "../lib/date";
+
+function formatBrasiliaDateTime(date: Date) {
+  return date.toLocaleString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 export default function CalendarPage() {
   const { tasks, filter, setFilter, addTask } = useTasks();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [brasiliaDateTime, setBrasiliaDateTime] = useState(() =>
+    formatBrasiliaDateTime(new Date())
+  );
 
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const { isOpen, open, close } = useNewTaskModal();
+  const { isOpen, open, close, prefillDate } = useNewTaskModal();
   const {
     isOpen: isDetailsOpen,
     selectedTask,
@@ -52,6 +65,14 @@ export default function CalendarPage() {
     return () => window.removeEventListener("resize", close);
   }, [menuOpen]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBrasiliaDateTime(formatBrasiliaDateTime(new Date()));
+    }, 60_000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div
       style={{
@@ -63,7 +84,11 @@ export default function CalendarPage() {
     >
       {/* SIDEBAR — desktop e tablet visível, mobile oculto por padrão */}
       {!isMobile && (
-        <Sidebar view="calendar" setView={() => {}} onNewTask={open} />
+        <Sidebar
+          view="calendar"
+          setView={() => {}}
+          onNewTask={() => open(selectedDate ? toLocalDateString(selectedDate) : undefined)}
+        />
       )}
 
       {/* SIDEBAR MOBILE — overlay */}
@@ -88,7 +113,11 @@ export default function CalendarPage() {
               zIndex: 30,
             }}
           >
-            <Sidebar view="calendar" setView={() => {}} onNewTask={open} />
+            <Sidebar
+              view="calendar"
+              setView={() => {}}
+              onNewTask={() => open(selectedDate ? toLocalDateString(selectedDate) : undefined)}
+            />
           </div>
         </>
       )}
@@ -137,6 +166,29 @@ export default function CalendarPage() {
               minHeight: isMobile ? "auto" : 0,
             }}
           >
+            <div style={{ marginBottom: 10 }}>
+              <h2
+                style={{
+                  fontSize: isMobile ? 16 : 20,
+                  fontWeight: 700,
+                  color: "#f1f5f9",
+                  letterSpacing: "-0.03em",
+                  margin: 0,
+                }}
+              >
+                Calendário
+              </h2>
+              <p
+                style={{
+                  margin: "6px 0 0",
+                  fontSize: 12,
+                  color: "rgba(148,163,184,0.65)",
+                }}
+              >
+                Brasília • {brasiliaDateTime}
+              </p>
+            </div>
+
             <CalendarHeader
               currentDate={currentDate}
               setCurrentDate={setCurrentDate}
@@ -171,6 +223,7 @@ export default function CalendarPage() {
       />
       <NewTaskModal
         isOpen={isOpen}
+        defaultDate={prefillDate}
         onClose={close}
         onCreate={(task) => {
           addTask(task);

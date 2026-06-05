@@ -16,7 +16,7 @@ export function useNewTaskModal(defaultDate?: string) {
   const [prefillDate, setPrefillDate] = useState(defaultDate ?? "");
 
   const open = useCallback((date?: string) => {
-    if (date) setPrefillDate(date);
+    setPrefillDate(date ?? "");
     setIsOpen(true);
   }, []);
 

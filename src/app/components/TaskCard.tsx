@@ -86,6 +86,15 @@ export function TaskCard({ task, onClick }: Props) {
   const status = statusConfig[task.status] ?? statusConfig.pendente;
   const subtitle = getSubtitle(task);
 
+  const taskDate = new Date(task.date);
+  const formattedDate = isNaN(taskDate.getTime())
+    ? task.date
+    : taskDate.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+
   return (
     <div
       style={{
@@ -163,21 +172,18 @@ export function TaskCard({ task, onClick }: Props) {
             : type.label}
         </span>
 
-        {/* 🚨 PRIORIDADE (CORRETO AGORA) */}
-        {task.status === "pendente" && (
-          <span
-            style={{
-              fontSize: 10.5,
-              fontWeight: 600,
-              color: "#f87171",
-              display: "flex",
-              alignItems: "center",
-              gap: 3,
-            }}
-          >
-            ● urgente
-          </span>
-        )}
+        {/* DATE */}
+      <p
+        style={{
+          fontSize: 11,
+          color: "rgba(148,163,184,0.6)",
+          lineHeight: 1.4,
+          marginBottom: 8,
+        }}
+      >
+        {formattedDate}
+      </p>
+        
       </div>
 
       {/* LOCATION */}
@@ -194,6 +200,8 @@ export function TaskCard({ task, onClick }: Props) {
       >
         {task.location}
       </h3>
+
+      
 
       {/* SUBTITLE + TIME */}
       <p

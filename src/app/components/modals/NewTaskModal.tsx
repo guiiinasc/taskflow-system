@@ -21,6 +21,14 @@ type Props = {
   defaultDate?: string; // pre-fill date from calendar selection
 };
 
+function getTodayDateString() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 // ─── Animation CSS ────────────────────────────────────────────────────────────
 
 const MODAL_ANIM_ID = "__ntm_anims__";
@@ -137,7 +145,7 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
   const [taskType,    setTaskType]    = useState<TaskType>("entrega");
   const [customType,  setCustomType]  = useState("");
   const [quantity,    setQuantity]    = useState("");
-  const [date,        setDate]        = useState(defaultDate);
+  const [date,        setDate]        = useState(defaultDate || getTodayDateString());
   const [status,      setStatus]      = useState<TaskStatus>("pendente");
 
   // UI state
@@ -156,7 +164,11 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
 
   // Sync defaultDate prop
   useEffect(() => {
-    if (defaultDate) setDate(defaultDate);
+    if (defaultDate) {
+      setDate(defaultDate);
+    } else {
+      setDate(getTodayDateString());
+    }
   }, [defaultDate]);
 
   // Autofocus location on open
@@ -169,7 +181,7 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
       setTaskType("entrega");
       setCustomType("");
       setQuantity("");
-      setDate(defaultDate);
+      setDate(defaultDate || getTodayDateString());
       setStatus("pendente");
       setErrors({});
       setTimeout(() => locationRef.current?.focus(), 80);
