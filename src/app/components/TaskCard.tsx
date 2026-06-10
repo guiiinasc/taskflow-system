@@ -1,13 +1,18 @@
 import { Task } from "../features/tasks/task.types";
+import { parseDateLocal } from "../lib/date";
+import { getTaskDisplayId } from "../utils/task";
 
 type Props = {
   task: Task;
   onClick?: (task: Task) => void;
 };
 
+type TaskType = Task["type"];
+type TaskStatus = Task["status"];
+
 // 🎨 CONFIG TYPE
 const typeConfig: Record<
-  string,
+  TaskType,
   { bg: string; color: string; border: string; label: string }
 > = {
   entrega: {
@@ -32,7 +37,7 @@ const typeConfig: Record<
 
 // 🎯 STATUS
 const statusConfig: Record<
-  string,
+  TaskStatus,
   { color: string; bg: string; border: string; label: string }
 > = {
   pendente: {
@@ -47,7 +52,7 @@ const statusConfig: Record<
     border: "rgba(34, 197, 94, 0.2)",
     label: "Concluído",
   },
-  "em_andamento": {
+  em_andamento: {
     color: "#93c5fd",
     bg: "rgba(59, 130, 246, 0.1)",
     border: "rgba(59, 130, 246, 0.2)",
@@ -82,11 +87,11 @@ function getSubtitle(task: Task) {
 export function TaskCard({ task, onClick }: Props) {
   const isCompleted = task.status === "concluido";
 
-  const type = typeConfig[task.type] ?? typeConfig["outro"];
+  const type = typeConfig[task.type] ?? typeConfig.outro;
   const status = statusConfig[task.status] ?? statusConfig.pendente;
   const subtitle = getSubtitle(task);
 
-  const taskDate = new Date(task.date);
+  const taskDate = parseDateLocal(task.date);
   const formattedDate = isNaN(taskDate.getTime())
     ? task.date
     : taskDate.toLocaleDateString("pt-BR", {
@@ -255,7 +260,7 @@ export function TaskCard({ task, onClick }: Props) {
               fontWeight: 500,
             }}
           >
-            #{task.id}
+            {getTaskDisplayId(task.id)}
           </span>
         </div>
 

@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { useAuth } from "../contexts/AuthContext";
 import { useAuthModal } from "../hooks/useAuthModal";
-
-type FilterType = "todas" | "pendente" | "concluido";
+import type { TaskFilter } from "../utils/task";
 
 type Props = {
-  filter: FilterType;
-  setFilter: (value: FilterType) => void;
+  filter: TaskFilter;
+  setFilter: (value: TaskFilter) => void;
   onMenuClick?: () => void;
   isMobile?: boolean;
 };

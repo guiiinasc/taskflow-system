@@ -2,17 +2,13 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { Task } from "../../features/tasks/task.types";
+import { toLocalDateString } from "../../utils/date";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type TaskStatus = "pendente" | "concluido";
-
-type TaskType = "entrega" | "manutencao" | "outro";
-
-type NewTask = Omit<Task, "id"> & {
-  type: TaskType;
-  customType?: string;
-};
+type TaskStatus = Task["status"];
+type TaskType = Task["type"];
+type NewTask = Omit<Task, "id" | "userId" | "createdAt" | "updatedAt">;
 
 type Props = {
   isOpen: boolean;
@@ -22,11 +18,7 @@ type Props = {
 };
 
 function getTodayDateString() {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  return toLocalDateString(new Date());
 }
 
 // ─── Animation CSS ────────────────────────────────────────────────────────────

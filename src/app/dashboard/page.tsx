@@ -14,8 +14,11 @@ import { useTaskDetailsModal } from "../hooks/useDetailsTaskModal";
 import { TaskDetailsModal } from "../components/modals/DetailsTaskModal";
 
 import { useTasks } from "../hooks/useTasks";
-import { groupTasks, getTaskStats } from "../features/tasks/task.utils";
+import { groupTasks, getTaskStats } from "../utils/task";
 import { useEffect, useState } from "react";
+import type { TaskTypeFilter } from "../utils/task";
+
+const TYPE_FILTER_OPTIONS = ["todas", "entrega", "manutencao"] as const satisfies readonly TaskTypeFilter[];
 
 function formatBrasiliaDateTime(date: Date) {
   return date.toLocaleString("pt-BR", {
@@ -29,7 +32,7 @@ function formatBrasiliaDateTime(date: Date) {
 }
 
 export default function Dashboard() {
-  const { tasks, allTasks, filter, setFilter, addTask } = useTasks();
+  const { tasks, allTasks, filter, setFilter, addTask, typeFilter, setTypeFilter } = useTasks();
 
   const { user } = useAuth();
   const {
@@ -47,7 +50,6 @@ export default function Dashboard() {
 
   const grouped = groupTasks(tasks);
   const stats = getTaskStats(allTasks);
-
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -164,38 +166,79 @@ export default function Dashboard() {
             flexDirection: "column",
           }}
         >
-          {/* TITLE */}
-          <div style={{ marginBottom: 20 }}>
-            <h1
-              style={{
-                fontSize: isMobile ? 16 : 20,
-                fontWeight: 700,
-                color: "#f1f5f9",
-                letterSpacing: "-0.03em",
-              }}
-            >
-              Operational Dashboard
-            </h1>
-            <p
-              style={{
-                fontSize: 12,
-                color: "rgba(148,163,184,0.65)",
-                margin: 0,
-                marginBottom: 4,
-              }}
-            >
-              Brasília • {brasiliaDateTime}
-            </p>
-            <p
-              style={{
-                fontSize: 12,
-                color: "rgba(148,163,184,0.5)",
-                margin: 0,
-              }}
-            >
-              Acompanhe e gerencie todas as tarefas operacionais
-            </p>
-          </div>
+         {/* TITLE */}
+<div style={{ marginBottom: 20 }}>
+  <h1
+    style={{
+      fontSize: isMobile ? 16 : 20,
+      fontWeight: 700,
+      color: "#f1f5f9",
+      letterSpacing: "-0.03em",
+    }}
+  >
+    Operational Dashboard
+  </h1>
+
+  <p
+    style={{
+      fontSize: 12,
+      color: "rgba(148,163,184,0.65)",
+      margin: 0,
+      marginBottom: 4,
+    }}
+  >
+    Brasília • {brasiliaDateTime}
+  </p>
+
+  <p
+    style={{
+      fontSize: 12,
+      color: "rgba(148,163,184,0.5)",
+      margin: 0,
+      marginBottom: 12,
+    }}
+  >
+    Acompanhe e gerencie todas as tarefas operacionais
+  </p>
+
+  {/* 🔥 FILTRO DE TIPO */}
+  <div style={{ display: "flex", gap: 6 }}>
+    {TYPE_FILTER_OPTIONS.map((type) => {
+      const active = typeFilter === type;
+
+      const label =
+        type === "todas"
+          ? "Todas"
+          : type === "entrega"
+          ? "Entrega"
+          : "Manutenção";
+
+      return (
+        <button
+          key={type}
+          onClick={() => setTypeFilter(type)}
+          style={{
+            padding: "6px 12px",
+            borderRadius: 999,
+            border: active
+              ? "1px solid rgba(56,189,248,0.5)"
+              : "1px solid rgba(255,255,255,0.08)",
+            background: active
+              ? "rgba(56,189,248,0.15)"
+              : "rgba(255,255,255,0.03)",
+            color: active ? "#38bdf8" : "#94a3b8",
+            fontSize: 11,
+            fontWeight: 600,
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+        >
+          {label}
+        </button>
+      );
+    })}
+  </div>
+</div>
 
           {view === "dashboard" && (
             <>

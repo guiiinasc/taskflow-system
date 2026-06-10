@@ -1,12 +1,14 @@
 "use client";
 
 import { CalendarDayCell } from "./CalendarDayCell";
+import type { Task } from "../../features/tasks/task.types";
+import { toLocalDateString } from "../../utils/date";
 
 type Props = {
   currentDate: Date;
   selectedDate: Date | null;
   onSelectDate: (date: Date) => void;
-  tasks: any[];
+  tasks: Task[];
   isMobile?: boolean;
   isTablet?: boolean;
 };
@@ -94,7 +96,7 @@ export function CalendarGrid({
             <div key={`empty-${index}`} />
           ) : (
             <CalendarDayCell
-              key={day.toISOString()}
+              key={toLocalDateString(day)}
               date={day}
               tasks={tasks}
               isSelected={selectedDate?.toDateString() === day.toDateString()}

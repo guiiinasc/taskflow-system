@@ -2,93 +2,150 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
+  type Dispatch,
   type ReactNode,
+  type SetStateAction,
 } from "react";
-import { tasks as initialTasks } from "../mocks/tasks";
-import type { Task } from "../features/tasks/task.types";
 
-type TaskFilter = "todas" | "pendente" | "concluido";
+import { useAuth } from "../contexts/AuthContext";
+import { tasks as initialTasks } from "./tasks.seed";
+import type { Task } from "../features/tasks/task.types";
+import {
+  normalizeTask,
+  normalizeTaskList,
+  type TaskFilter,
+  type TaskTypeFilter,
+} from "../utils/task";
+import { toLocalDateString } from "../lib/date";
 
 type TasksContextValue = {
   tasks: Task[];
   allTasks: Task[];
   filter: TaskFilter;
   setFilter: (filter: TaskFilter) => void;
-  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-  addTask: (task: Omit<Task, "id">) => void;
-
-  // 🔥 NOVOS
-  updateTask: (id: Task["id"], data: Partial<Omit<Task, "id">>) => void;
-  toggleTaskStatus: (id: Task["id"], status: Task["status"]) => void;
+  typeFilter: TaskTypeFilter;
+  setTypeFilter: (filter: TaskTypeFilter) => void;
+  setTasks: Dispatch<SetStateAction<Task[]>>;
+  addTask: (
+    task: Omit<Task, "id" | "userId" | "createdAt" | "updatedAt">
+  ) => void;
+  updateTask: (
+    id: Task["id"],
+    data: Partial<Omit<Task, "id" | "userId" | "createdAt" | "updatedAt">>
+  ) => void;
+  toggleTaskStatus: (
+    id: Task["id"],
+    status: Task["status"]
+  ) => void;
   deleteTask: (id: Task["id"]) => void;
 };
 
 const TasksContext = createContext<TasksContextValue | undefined>(undefined);
+const STORAGE_KEY = "taskflow-tasks";
 
 export function TasksProvider({ children }: { children: ReactNode }) {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const { user } = useAuth();
+
+  const [tasks, setTasks] = useState<Task[]>(() =>
+    normalizeTaskList(initialTasks, "local-user")
+  );
   const [filter, setFilter] = useState<TaskFilter>("todas");
+  const [typeFilter, setTypeFilter] = useState<TaskTypeFilter>("todas");
 
-  const filteredTasks = useMemo(() => {
-    if (filter === "todas") return tasks;
-    return tasks.filter((task) => task.status === filter);
-  }, [filter, tasks]);
+  const currentUserId = user?.id ?? "local-user";
 
-  // ✅ ADD TASK
-  const addTask = (task: Omit<Task, "id">) => {
-    const idNum = Date.now() + Math.floor(Math.random() * 1000);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-    const newTask: Task = {
-      ...task,
-      id: idNum,
-    };
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        setTasks(normalizeTaskList(JSON.parse(stored), currentUserId));
+        return;
+      }
 
-    setTasks((prev) => [...prev, newTask]);
-  };
+      setTasks(normalizeTaskList(initialTasks, currentUserId));
+    } catch {
+      setTasks(normalizeTaskList(initialTasks, currentUserId));
+    }
+  }, [currentUserId]);
 
-  // 🔥 UPDATE TASK
-  const updateTask = (id: Task["id"], data: Partial<Omit<Task, "id">>) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, ...data } : t))
-    );
-  };
-
-  // 🔥 CORRIGIDO: AGORA ACEITA STATUS
-  const toggleTaskStatus = (
-    id: Task["id"],
-    status: Task["status"]
-  ) => {
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, status } : t
-      )
-    );
-  };
-
-  // 🔥 DELETE
-  const deleteTask = (id: Task["id"]) => {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  // 💾 persistência
   useEffect(() => {
     try {
-      window.localStorage.setItem("taskflow-tasks", JSON.stringify(tasks));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     } catch {}
   }, [tasks]);
 
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem("taskflow-tasks");
-      if (stored) {
-        setTasks(JSON.parse(stored) as Task[]);
-      }
-    } catch {}
+  const addTask = useCallback(
+    (task: Omit<Task, "id" | "userId" | "createdAt" | "updatedAt">) => {
+      const nowIso = toLocalDateString(new Date());
+      const newTask = normalizeTask(
+        {
+          ...task,
+          id: `task_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          userId: currentUserId,
+          createdAt: nowIso,
+          updatedAt: nowIso,
+        },
+        currentUserId
+      );
+
+      setTasks((prev) => [...prev, newTask]);
+    },
+    [currentUserId]
+  );
+
+  const updateTask = useCallback(
+    (
+      id: Task["id"],
+      data: Partial<Omit<Task, "id" | "userId" | "createdAt" | "updatedAt">>
+    ) => {
+      const nowIso = toLocalDateString(new Date());
+
+      setTasks((prev) =>
+        prev.map((task) => {
+          if (task.id !== id) return task;
+
+          return normalizeTask(
+            {
+              ...task,
+              ...data,
+              id: task.id,
+              userId: task.userId,
+              createdAt: task.createdAt,
+              updatedAt: nowIso,
+            },
+            currentUserId
+          );
+        })
+      );
+    },
+    [currentUserId]
+  );
+
+  const toggleTaskStatus = useCallback(
+    (id: Task["id"], status: Task["status"]) => {
+      updateTask(id, { status });
+    },
+    [updateTask]
+  );
+
+  const deleteTask = useCallback((id: Task["id"]) => {
+    setTasks((prev) => prev.filter((task) => task.id !== id));
   }, []);
+
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((task) => {
+      const statusOk = filter === "todas" || task.status === filter;
+      const typeOk = typeFilter === "todas" || task.type === typeFilter;
+      return statusOk && typeOk;
+    });
+  }, [tasks, filter, typeFilter]);
 
   const value = useMemo(
     () => ({
@@ -96,22 +153,18 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       allTasks: tasks,
       filter,
       setFilter,
+      typeFilter,
+      setTypeFilter,
       setTasks,
       addTask,
-
-      // 🔥 novos
       updateTask,
       toggleTaskStatus,
       deleteTask,
     }),
-    [filteredTasks, tasks, filter]
+    [filteredTasks, tasks, filter, typeFilter, addTask, updateTask, toggleTaskStatus, deleteTask]
   );
 
-  return (
-    <TasksContext.Provider value={value}>
-      {children}
-    </TasksContext.Provider>
-  );
+  return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;
 }
 
 export function useTasks() {

@@ -1,13 +1,20 @@
-import { Task } from "./task.types";
-
 function toLocalDateString(date: Date): string {
-  const year  = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day   = String(date.getDate()).padStart(2, "0");
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
-export function groupTasks(tasks: Task[]) {
+type TaskLike = {
+  date: string;
+  status: "pendente" | "em_andamento" | "concluido" | "cancelado";
+  type: "entrega" | "manutencao" | "outro";
+  quantity?: number;
+  description?: string;
+  customType?: string;
+};
+
+export function groupTasks(tasks: TaskLike[]) {
   const now      = new Date();
   const today    = toLocalDateString(now);
 
@@ -31,7 +38,7 @@ export function groupTasks(tasks: Task[]) {
   };
 }
 
-export function getTaskStats(tasks: Task[]) {
+export function getTaskStats(tasks: TaskLike[]) {
   const total     = tasks.length;
   const pending   = tasks.filter((t) => t.status === "pendente").length;
   const completed = tasks.filter((t) => t.status === "concluido").length;
@@ -39,7 +46,7 @@ export function getTaskStats(tasks: Task[]) {
   return { total, pending, completed };
 }
 
-export function getTaskSubtitle(task: Task) {
+export function getTaskSubtitle(task: TaskLike) {
   if (task.type === "entrega") {
     if (task.quantity) return `${task.quantity} pacotes`;
     return "Entrega";
@@ -58,7 +65,7 @@ export function getTaskSubtitle(task: Task) {
   return "";
 }
 
-export function getTaskTypeMeta(task: Task) {
+export function getTaskTypeMeta(task: TaskLike) {
   switch (task.type) {
     case "entrega":
       return {
@@ -86,7 +93,7 @@ export function getTaskTypeMeta(task: Task) {
   }
 }
 
-export function getTaskStatusMeta(task: Task) {
+export function getTaskStatusMeta(task: TaskLike) {
   if (task.status === "concluido") {
     return {
       label: "Concluído",

@@ -6,8 +6,8 @@ import { useTasks } from "../../hooks/useTasks";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type TaskType   = "entrega" | "manutencao" | "outro";
-type TaskStatus = "pendente" | "concluido";
+type TaskType = Task["type"];
+type TaskStatus = Task["status"];
 
 type Props = {
   isOpen:       boolean;
@@ -113,12 +113,26 @@ const STATUS_CONFIG: Record<TaskStatus, { color: string; bg: string; border: str
     label:  "Pendente",
     dot:    "#f87171",
   },
+  em_andamento: {
+    color:  "#93c5fd",
+    bg:     "rgba(59,130,246,0.1)",
+    border: "rgba(59,130,246,0.2)",
+    label:  "Em andamento",
+    dot:    "#60a5fa",
+  },
   concluido: {
     color:  "#86efac",
     bg:     "rgba(34,197,94,0.1)",
     border: "rgba(34,197,94,0.2)",
     label:  "Concluído",
     dot:    "#4ade80",
+  },
+  cancelado: {
+    color:  "#9ca3af",
+    bg:     "rgba(156,163,175,0.1)",
+    border: "rgba(156,163,175,0.2)",
+    label:  "Cancelado",
+    dot:    "#9ca3af",
   },
 };
 
@@ -413,6 +427,7 @@ export function TaskDetailsModal({ isOpen, task, onClose }: Props) {
         quantity:    taskType === "entrega" ? (Number(quantity) || undefined) : undefined,
         date:        date || task.date,
         status,
+        time:        task.time,      
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);

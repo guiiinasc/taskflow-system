@@ -1,19 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import type { Task } from "../../features/tasks/task.types";
 import { parseDateLocal } from "../../lib/date";
 
 type Props = {
   date: Date;
-  tasks: any[];
+  tasks: Task[];
   isSelected: boolean;
   onClick: () => void;
   isMobile?: boolean;
   isTablet?: boolean;
 };
 
-function getTaskPillColor(task: any): { bg: string; color: string } {
-  const status = task?.status?.toLowerCase() ?? "";
+function getTaskPillColor(task: Task): { bg: string; color: string } {
+  const status = task.status;
 
   if (status === "pendente")
     return { bg: "rgba(239,68,68,0.15)", color: "#fca5a5" };
@@ -44,7 +45,7 @@ export function CalendarDayCell({
   const today = new Date();
   const isToday = today.toDateString() === date.toDateString();
 
-  const dayTasks = tasks.filter((t: any) => {
+  const dayTasks = tasks.filter((t) => {
     if (!t?.date) return false;
     const d = parseDateLocal(t.date);
     return d.toDateString() === date.toDateString();
@@ -175,7 +176,7 @@ export function CalendarDayCell({
       {/* 📌 Task pills */}
       {visibleTasks.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          {visibleTasks.map((task: any, i: number) => {
+          {visibleTasks.map((task, i: number) => {
             const { bg, color } = getTaskPillColor(task);
             return (
               <div

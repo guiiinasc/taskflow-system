@@ -4,27 +4,27 @@ import { useEffect, useRef, useState } from "react";
 import { parseDateLocal } from "../../lib/date";
 import { useTaskDetailsModal } from "../../hooks/useDetailsTaskModal";
 import { TaskDetailsModal } from "../modals/DetailsTaskModal";
-import { Task } from "../../features/tasks/task.types";
-
-type FilterType = "todas" | "pendente" | "concluido";
+import type { Task } from "../../features/tasks/task.types";
+import type { TaskFilter } from "../../utils/task";
+import { getTaskDisplayId } from "../../utils/task";
 
 type Props = {
   selectedDate: Date | null;
-  tasks: any[];
+  tasks: Task[];
   isMobile?: boolean;
   isTablet?: boolean;
-  filter?: FilterType;
-  onTaskClick?: (task: any) => void;
+  filter?: TaskFilter;
+  onTaskClick?: (task: Task) => void;
 };
 
-function getStatusStyle(status: string): { bg: string; color: string; label: string } {
-  const s = status?.toLowerCase() ?? "";
-  if (s === "pendente") return { bg: "rgba(248,113,113,0.14)", color: "#f87171", label: "Pendente" };
-  if (s === "concluido") return { bg: "rgba(74,222,128,0.14)", color: "#4ade80", label: "Concluído" };
+function getStatusStyle(status: Task["status"]): { bg: string; color: string; label: string } {
+  if (status === "pendente") return { bg: "rgba(248,113,113,0.14)", color: "#f87171", label: "Pendente" };
+  if (status === "concluido") return { bg: "rgba(74,222,128,0.14)", color: "#4ade80", label: "Concluído" };
+  if (status === "cancelado") return { bg: "rgba(156,163,175,0.12)", color: "#9ca3af", label: "Cancelado" };
   return { bg: "rgba(56,189,248,0.12)", color: "#38bdf8", label: "Em andamento" };
 }
 
-function getFilterBadge(filter: FilterType): { label: string; bg: string; color: string } {
+function getFilterBadge(filter: TaskFilter): { label: string; bg: string; color: string } {
   if (filter === "pendente") return { label: "Pendentes", bg: "rgba(251,191,36,0.12)", color: "#fbbf24" };
   if (filter === "concluido") return { label: "Concluídos", bg: "rgba(74,222,128,0.12)", color: "#4ade80" };
   return { label: "Todas", bg: "rgba(148,163,184,0.08)", color: "rgba(148,163,184,0.7)" };
@@ -126,27 +126,27 @@ function TaskCard({
   animKey,
   onClick
 }: {
-  task: any;
+  task: Task;
   index: number;
   isMobile: boolean;
   animKey: string;
-  onClick?: (task: any) => void;
+  onClick?: (task: Task) => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const status = getStatusStyle(task?.status ?? "");
+  const status = getStatusStyle(task.status);
   const typeLabel =
-    task?.type === "outro"
-      ? task?.customType || "Outro"
-      : task?.type === "entrega"
+    task.type === "outro"
+      ? task.customType || "Outro"
+      : task.type === "entrega"
         ? "Entrega"
         : "Manutenção";
 
   const secondaryText =
-    task?.type === "entrega"
-      ? task?.quantity != null
+    task.type === "entrega"
+      ? task.quantity != null
         ? `${task.quantity} unidades`
         : "Quantidade não definida"
-      : task?.description || "Sem descrição";
+      : task.description || "Sem descrição";
 
   return (
     <div
@@ -253,7 +253,7 @@ function TaskCard({
             <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
             <path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2" />
           </svg>
-          #{task?.id ?? "?"}
+          {getTaskDisplayId(task.id)}
         </span>
 
         <span
@@ -270,7 +270,7 @@ function TaskCard({
             textTransform: "capitalize",
           }}
         >
-          {task?.status?.toLowerCase() === "concluido" ? <IconCheck /> : <IconClock />}
+          {task.status === "concluido" ? <IconCheck /> : <IconClock />}
           {status.label}
         </span>
       </div>
@@ -310,21 +310,26 @@ export function CalendarSidePanel({
 
   if (!selectedDate) return <EmptyPrompt isMobile={isMobile} />;
 
-  const dayTasks = tasks.filter((t: any) => {
+  const dayTasks = tasks.filter((t) => {
     if (!t?.date) return false;
     const d = parseDateLocal(t.date);
     return d.toDateString() === selectedDate.toDateString();
   });
 
-  const filteredTasks = dayTasks.filter((t: any) => {
-    if (filter === "pendente") return t?.status?.toLowerCase() === "pendente";
-    if (filter === "concluido") return t?.status?.toLowerCase() === "concluido";
+  const filteredTasks = dayTasks.filter((t) => {
+    if (filter === "pendente") return t.status === "pendente";
+    if (filter === "concluido") return t.status === "concluido";
     return true;
   });
 
   const sortedTasks = [...filteredTasks].sort((a, b) => {
-    const order: Record<string, number> = { pendente: 0, concluido: 1 };
-    return (order[a?.status] ?? 2) - (order[b?.status] ?? 2);
+    const order: Record<Task["status"], number> = {
+      pendente: 0,
+      em_andamento: 1,
+      concluido: 2,
+      cancelado: 3,
+    };
+    return order[a.status] - order[b.status];
   });
 
   const weekday = selectedDate.toLocaleString("pt-BR", { weekday: "long" });
@@ -523,9 +528,9 @@ export function CalendarSidePanel({
             </p>
           </div>
         ) : (
-          sortedTasks.map((task: any, i: number) => (
+          sortedTasks.map((task, i: number) => (
             <TaskCard
-              key={(task?.id ?? i) + animKey}
+              key={task.id + animKey}
               task={task}
               index={i}
               isMobile={isMobile}

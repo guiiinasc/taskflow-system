@@ -7,7 +7,8 @@ export type TaskStatus =
 export type TaskType = "entrega" | "manutencao" | "outro";
 
 export interface Task {
-  id: string | number;
+  id: string;
+  userId: string;
   location: string;
   quantity?: number;
   description?: string;
@@ -16,4 +17,6 @@ export interface Task {
   time?: string;
   type: TaskType;
   status: TaskStatus;
+  createdAt: string;
+  updatedAt: string;
 }
