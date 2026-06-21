@@ -6,7 +6,7 @@ export async function registerController(req: Request, res: Response) {
   try {
     const data = registerSchema.parse(req.body);
 
-    const user = await register(data.email, data.name, data.password);
+    const user = await register(data.name, data.email, data.password);
 
     return res.status(201).json(user);
   } catch (err: any) {
@@ -22,6 +22,10 @@ export async function loginController(req: Request, res: Response) {
 
     return res.json(result);
   } catch (err: any) {
-    return res.status(400).json({ error: err.message });
+    console.log("LOGIN ERROR FULL:", err);
+    return res.status(400).json({
+      error: err.message,
+      full: err,
+    });
   }
 }

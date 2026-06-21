@@ -14,4 +14,36 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
+  task      Task[]
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  location    String?
+  type        TaskType
+  status      TaskStatus
+  date        DateTime
+  time        String?
+  quantity    Int?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([date])
+}
+
+enum TaskStatus {
+  pendente
+  em_andamento
+  concluido
+  cancelado
+}
+
+enum TaskType {
+  entrega
+  manutencao
+  outro
 }

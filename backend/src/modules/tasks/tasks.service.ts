@@ -1,58 +1,64 @@
-import { randomUUID } from "crypto";
+import { prisma } from "../../config/prisma";
 
-type Task = {
-  id: string;
-  userId: string;
-  title: string;
-  date: string;
-  status: "pendente" | "concluido";
-};
-
-const tasks: Task[] = [];
-
-export function createTask(userId: string, title: string, date: string) {
-  const task: Task = {
-    id: randomUUID(),
-    userId,
-    title,
-    date,
-    status: "pendente",
-  };
-
-  tasks.push(task);
-  return task;
+export async function createTask(userId: string, data: any) {
+  return prisma.task.create({
+    data: {
+      title: data.title,
+      description: data.description,
+      location: data.location,
+      type: data.type,
+      status: data.status ?? "pendente",
+      date: new Date(data.date),
+      time: data.time,
+      quantity: data.quantity,
+      userId,
+    },
+  });
 }
 
-export function getTasks(userId: string) {
-  return tasks.filter((t) => t.userId === userId);
+export async function getTasks(userId: string) {
+  return prisma.task.findMany({
+    where: { userId },
+    orderBy: { date: "asc" },
+  });
 }
 
-export function getTaskById(userId: string, taskId: string) {
-  const task = tasks.find(
-    (t) => t.id === taskId && t.userId === userId
-  );
+export async function getTaskById(userId: string, taskId: string) {
+  const task = await prisma.task.findFirst({
+    where: { id: taskId, userId },
+  });
 
   if (!task) throw new Error("Task não encontrada");
 
   return task;
 }
 
-export function updateTask(userId: string, taskId: string, data: Partial<Task>) {
-  const task = tasks.find((t) => t.id === taskId && t.userId === userId);
+export async function updateTask(userId: string, taskId: string, data: any) {
+  const task = await prisma.task.findFirst({
+    where: { id: taskId, userId },
+  });
 
   if (!task) throw new Error("Task não encontrada");
 
-  Object.assign(task, data);
-
-  return task;
+  return prisma.task.update({
+    where: { id: taskId },
+    data: {
+      ...data,
+      date: data.date ? new Date(data.date) : undefined,
+    },
+  });
 }
 
-export function deleteTask(userId: string, taskId: string) {
-  const index = tasks.findIndex(
-    (t) => t.id === taskId && t.userId === userId
-  );
+export async function deleteTask(userId: string, taskId: string) {
+  const task = await prisma.task.findFirst({
+    where: { id: taskId, userId },
+  });
 
-  if (index === -1) throw new Error("Task não encontrada");
+  if (!task) throw new Error("Task não encontrada");
 
-  tasks.splice(index, 1);
+  await prisma.task.delete({
+    where: { id: taskId },
+  });
+
+  return { message: "Task deletada" };
 }
