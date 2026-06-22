@@ -19,7 +19,7 @@ export async function createTask(userId: string, data: any) {
 export async function getTasks(userId: string) {
   return prisma.task.findMany({
     where: { userId },
-    orderBy: { date: "asc" },
+    orderBy: { createdAt: "desc" },
   });
 }
 
@@ -60,5 +60,5 @@ export async function deleteTask(userId: string, taskId: string) {
     where: { id: taskId },
   });
 
-  return { message: "Task deletada" };
+  return { message: "Task deletada com sucesso" };
 }
