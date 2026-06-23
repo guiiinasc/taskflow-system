@@ -13,15 +13,9 @@ import {
 } from "react";
 
 import { useAuth } from "../contexts/AuthContext";
-import { tasks as initialTasks } from "./tasks.seed";
 import type { Task } from "../features/tasks/task.types";
-import {
-  normalizeTask,
-  normalizeTaskList,
-  type TaskFilter,
-  type TaskTypeFilter,
-} from "../utils/task";
-import { toLocalDateString } from "../lib/date";
+import type { TaskFilter, TaskTypeFilter } from "../utils/task";
+import * as service from "../features/tasks/task.service";
 
 type TasksContextValue = {
   tasks: Task[];
@@ -46,86 +40,62 @@ type TasksContextValue = {
 };
 
 const TasksContext = createContext<TasksContextValue | undefined>(undefined);
-const STORAGE_KEY = "taskflow-tasks";
 
 export function TasksProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
 
-  const [tasks, setTasks] = useState<Task[]>(() =>
-    normalizeTaskList(initialTasks, "local-user")
-  );
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<TaskFilter>("todas");
   const [typeFilter, setTypeFilter] = useState<TaskTypeFilter>("todas");
 
-  const currentUserId = user?.id ?? "local-user";
-
+  // 🔥 CORREÇÃO PRINCIPAL AQUI
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    try {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setTasks(normalizeTaskList(JSON.parse(stored), currentUserId));
-        return;
+    async function load() {
+      try {
+        const data = await service.getTasks();
+        setTasks(data.data || data);
+      } catch (err) {
+        console.error("Erro ao carregar tasks", err);
       }
-
-      setTasks(normalizeTaskList(initialTasks, currentUserId));
-    } catch {
-      setTasks(normalizeTaskList(initialTasks, currentUserId));
     }
-  }, [currentUserId]);
 
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-    } catch {}
-  }, [tasks]);
+    if (user) {
+      load();
+    } else {
+      setTasks([]); // limpa quando não tem user
+    }
+  }, [user]);
 
   const addTask = useCallback(
-    (task: Omit<Task, "id" | "userId" | "createdAt" | "updatedAt">) => {
-      const nowIso = toLocalDateString(new Date());
-      const newTask = normalizeTask(
-        {
-          ...task,
-          id: `task_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-          userId: currentUserId,
-          createdAt: nowIso,
-          updatedAt: nowIso,
-        },
-        currentUserId
-      );
-
-      setTasks((prev) => [...prev, newTask]);
+    async (
+      taskData: Omit<Task, "id" | "userId" | "createdAt" | "updatedAt">
+    ) => {
+      try {
+        const newTask = await service.createTask(taskData);
+        setTasks((prev) => [...prev, newTask.data || newTask]);
+      } catch (err) {
+        console.error(err);
+      }
     },
-    [currentUserId]
+    []
   );
 
   const updateTask = useCallback(
-    (
+    async (
       id: Task["id"],
       data: Partial<Omit<Task, "id" | "userId" | "createdAt" | "updatedAt">>
     ) => {
-      const nowIso = toLocalDateString(new Date());
+      try {
+        const updated = await service.updateTask(id, data);
 
-      setTasks((prev) =>
-        prev.map((task) => {
-          if (task.id !== id) return task;
-
-          return normalizeTask(
-            {
-              ...task,
-              ...data,
-              id: task.id,
-              userId: task.userId,
-              createdAt: task.createdAt,
-              updatedAt: nowIso,
-            },
-            currentUserId
-          );
-        })
-      );
+        setTasks((prev) =>
+          prev.map((t) => (t.id === id ? updated.data || updated : t))
+        );
+      } catch (err) {
+        console.error(err);
+      }
     },
-    [currentUserId]
+    []
   );
 
   const toggleTaskStatus = useCallback(
@@ -135,8 +105,13 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     [updateTask]
   );
 
-  const deleteTask = useCallback((id: Task["id"]) => {
-    setTasks((prev) => prev.filter((task) => task.id !== id));
+  const deleteTask = useCallback(async (id: Task["id"]) => {
+    try {
+      await service.deleteTask(id);
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
   }, []);
 
   const filteredTasks = useMemo(() => {
@@ -161,10 +136,23 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       toggleTaskStatus,
       deleteTask,
     }),
-    [filteredTasks, tasks, filter, typeFilter, addTask, updateTask, toggleTaskStatus, deleteTask]
+    [
+      filteredTasks,
+      tasks,
+      filter,
+      typeFilter,
+      addTask,
+      updateTask,
+      toggleTaskStatus,
+      deleteTask,
+    ]
   );
 
-  return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;
+  return (
+    <TasksContext.Provider value={value}>
+      {children}
+    </TasksContext.Provider>
+  );
 }
 
 export function useTasks() {

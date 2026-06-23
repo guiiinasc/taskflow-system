@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import axios from "axios";
 
 type User = {
   id: string;
@@ -19,16 +20,9 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  function createUser(email: string): User {
-    const normalizedEmail = email.trim().toLowerCase();
-    return {
-      id: normalizedEmail,
-      email: normalizedEmail,
-    };
-  }
-
   function persistUser(nextUser: User | null) {
     if (typeof window === "undefined") return;
+
     if (nextUser) {
       localStorage.setItem("auth-user", JSON.stringify(nextUser));
     } else {
@@ -38,36 +32,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
     try {
       const stored = localStorage.getItem("auth-user");
       if (stored) {
-        const parsed = JSON.parse(stored) as Partial<User>;
-        if (parsed.email) {
-          setUser(createUser(parsed.email));
-        }
+        const parsed = JSON.parse(stored) as User;
+        setUser(parsed);
       }
     } catch {}
   }, []);
 
   const login = async (email: string, password: string) => {
-    // MVP SIMPLES (fake login)
     if (!email || !password) {
       throw new Error("Preencha todos os campos");
     }
 
-    const fakeUser = createUser(email);
-    persistUser(fakeUser);
-    setUser(fakeUser);
+    const response = await axios.post("http://localhost:3333/auth/login", {
+      email,
+      password,
+    });
+
+    const { token } = response.data;
+
+    // salva token para requests futuras
+    localStorage.setItem("token", token);
+
+    // decode simples do usuário (vem do backend no JWT payload)
+    const payload = JSON.parse(atob(token.split(".")[1]));
+
+    const realUser: User = {
+      id: payload.id,
+      email: payload.email,
+    };
+
+    persistUser(realUser);
+    setUser(realUser);
   };
 
   const register = async (email: string, password: string) => {
-    // MVP simples
-    const newUser = createUser(email);
-    persistUser(newUser);
-    setUser(newUser);
+    if (!email || !password) {
+      throw new Error("Preencha todos os campos");
+    }
+
+    await axios.post("http://localhost:3333/auth/register", {
+      email,
+      password,
+    });
   };
 
   const logout = () => {
+    localStorage.removeItem("token");
     persistUser(null);
     setUser(null);
   };

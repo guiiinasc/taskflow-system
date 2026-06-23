@@ -3,7 +3,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import routes from "./routes";
 
 dotenv.config();
 
@@ -20,17 +19,14 @@ app.use(
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
-    credentials: true,
+    origin: "*",
   })
 );
 
 app.use(express.json());
 
-app.use("/api", routes);
-
 app.get("/", (req, res) => {
-  res.send("API rodando ");
+  res.send("API rodando");
 });
 
 export default app;
