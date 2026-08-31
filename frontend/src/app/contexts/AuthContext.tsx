@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { api } from "../lib/api";
+import { useToast } from "./ToastContext";
 
 type User = {
   id: string;
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const { showToast } = useToast();
 
   function persistUser(nextUser: User | null) {
     if (typeof window === "undefined") return;
@@ -55,6 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { token } = response.data;
 
+    showToast("Login feito com sucesso", "success");
+
     // salva token para requests futuras
     localStorage.setItem("token", token);
 
@@ -80,6 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
     });
+
+    showToast("Conta criada com sucesso", "success");
   };
 
   const logout = () => {

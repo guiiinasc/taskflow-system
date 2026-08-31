@@ -4,6 +4,8 @@ import "./globals.css";
 import { TasksProvider } from "./hooks/useTasks";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AuthModalProvider } from "./hooks/useAuthModal";
+import { HolidaysProvider } from "./providers/HolidaysProvider";
+import { ToastProvider } from "./contexts/ToastContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,11 +33,15 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>
-          <AuthModalProvider>
-            <TasksProvider>{children}</TasksProvider>
-          </AuthModalProvider>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <AuthModalProvider>
+              <HolidaysProvider>
+                <TasksProvider>{children}</TasksProvider>
+              </HolidaysProvider>
+            </AuthModalProvider>
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

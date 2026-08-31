@@ -2,6 +2,7 @@
 
 import { CalendarDayCell } from "./CalendarDayCell";
 import type { Task } from "../../features/tasks/task.types";
+import type { Holiday } from "../../features/holidays/holiday.types";
 import { toLocalDateString } from "../../utils/date";
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
   selectedDate: Date | null;
   onSelectDate: (date: Date) => void;
   tasks: Task[];
+  holidays?: Holiday[];
   isMobile?: boolean;
   isTablet?: boolean;
 };
@@ -21,6 +23,7 @@ export function CalendarGrid({
   selectedDate,
   onSelectDate,
   tasks,
+  holidays = [],
   isMobile = false,
   isTablet = false,
 }: Props) {
@@ -99,6 +102,7 @@ export function CalendarGrid({
               key={toLocalDateString(day)}
               date={day}
               tasks={tasks}
+              holidays={holidays}
               isSelected={selectedDate?.toDateString() === day.toDateString()}
               onClick={() => onSelectDate(day)}
               isMobile={isMobile}

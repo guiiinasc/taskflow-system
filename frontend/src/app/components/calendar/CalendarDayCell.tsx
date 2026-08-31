@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Task } from "../../features/tasks/task.types";
-import { parseDateLocal } from "../../lib/date";
+import type { Holiday } from "../../features/holidays/holiday.types";
+import { getHolidayByDate } from "../../features/holidays/holiday.utils";
+import { parseDateLocal, toLocalDateString } from "../../lib/date";
+import { useTasks } from "../../hooks/useTasks";
+import { useToast } from "../../contexts/ToastContext";
 
 type Props = {
   date: Date;
   tasks: Task[];
+  holidays?: Holiday[];
   isSelected: boolean;
   onClick: () => void;
   isMobile?: boolean;
@@ -34,16 +39,27 @@ function getTaskPillColor(task: Task): { bg: string; color: string } {
 export function CalendarDayCell({
   date,
   tasks,
+  holidays = [],
   isSelected,
   onClick,
   isMobile = false,
   isTablet = false,
 }: Props) {
   const [hovered, setHovered] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [pendingMove, setPendingMove] = useState<{
+    taskId: string;
+    taskLocation: string;
+    fromDate: string;
+    toDate: string;
+  } | null>(null);
+  const { updateTask } = useTasks();
+  const { showToast } = useToast();
 
   const day = date.getDate();
   const today = new Date();
   const isToday = today.toDateString() === date.toDateString();
+  const holiday = useMemo(() => getHolidayByDate(date, holidays), [date, holidays]);
 
   const dayTasks = tasks.filter((t) => {
     if (!t?.date) return false;
@@ -55,9 +71,46 @@ export function CalendarDayCell({
   const visibleTasks = dayTasks.slice(0, maxPills);
   const extraCount = dayTasks.length - visibleTasks.length;
 
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const taskId = event.dataTransfer.getData("text/task-id");
+    if (!taskId) {
+      setIsDragOver(false);
+      return;
+    }
+
+    const nextDate = toLocalDateString(date);
+    const currentTask = tasks.find((task) => task.id === taskId);
+
+    if (!currentTask || currentTask.date === nextDate || currentTask.status === "concluido") {
+      setIsDragOver(false);
+      return;
+    }
+
+    setPendingMove({
+      taskId,
+      taskLocation: currentTask.location || "Task",
+      fromDate: currentTask.date,
+      toDate: nextDate,
+    });
+    setIsDragOver(false);
+  };
+
+  const confirmMoveTask = async () => {
+    if (!pendingMove) return;
+
+    await updateTask(pendingMove.taskId, { date: pendingMove.toDate });
+    showToast(
+      `Task atualizada! Data: ${parseDateLocal(pendingMove.toDate).toLocaleDateString("pt-BR")}`,
+      "success"
+    );
+    setPendingMove(null);
+  };
+
   // 🔥 Inteligência UX
   const isBusy = dayTasks.length >= 4;
   const hasPending = dayTasks.some((t) => t.status === "pendente");
+  const isHolidayDay = Boolean(holiday);
 
   // 🎨 Estados visuais
   let background = "rgba(255,255,255,0.02)";
@@ -65,8 +118,8 @@ export function CalendarDayCell({
   let boxShadow = "none";
 
   if (isSelected) {
-    background = "rgba(56,189,248,0.08)";
-    borderColor = "rgba(56,189,248,0.35)";
+    background = isHolidayDay ? "rgba(250,204,21,0.12)" : "rgba(56,189,248,0.08)";
+    borderColor = isHolidayDay ? "rgba(250,204,21,0.5)" : "rgba(56,189,248,0.35)";
     boxShadow = "0 0 0 1px rgba(56,189,248,0.2) inset";
   } else if (isToday) {
     background = "rgba(255,255,255,0.04)";
@@ -82,21 +135,141 @@ export function CalendarDayCell({
     borderColor = "rgba(239,68,68,0.2)";
   }
 
+  if (isHolidayDay && !isSelected) {
+    borderColor = "rgba(250,204,21,0.4)";
+    background = "rgba(250,204,21,0.06)";
+  }
+
+  if (isDragOver) {
+    background = "rgba(52, 211, 153, 0.12)";
+    borderColor = "rgba(52, 211, 153, 0.6)";
+    boxShadow = "0 0 0 1px rgba(52,211,153,0.3) inset, 0 0 0 3px rgba(52,211,153,0.08)";
+  }
+
   const minHeight = isMobile ? 44 : isTablet ? 68 : 80;
   const padding = isMobile ? "6px 5px 4px" : "8px 8px 6px";
 
   return (
-    <div
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onMouseDown={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "scale(0.97)";
-      }}
-      onMouseUp={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "scale(1)";
-      }}
-      style={{
+    <>
+      {pendingMove && (
+        <div
+          onClick={() => setPendingMove(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(2, 6, 23, 0.72)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 2000,
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              width: "min(92vw, 420px)",
+              background: "#0F172A",
+              border: "1px solid rgba(148,163,184,0.2)",
+              borderRadius: 18,
+              padding: "22px 20px 18px",
+              boxShadow: "0 32px 80px rgba(15, 23, 42, 0.6)",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontSize: 11,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "#7dd3fc",
+                fontWeight: 700,
+              }}
+            >
+              Alterar data
+            </p>
+            <h3
+              style={{
+                margin: "10px 0 8px",
+                fontSize: 22,
+                color: "#f8fafc",
+                fontWeight: 700,
+              }}
+            >
+              Mover tarefa?
+            </h3>
+            <p
+              style={{
+                margin: 0,
+                color: "rgba(148,163,184,0.8)",
+                fontSize: 14,
+                lineHeight: 1.6,
+              }}
+            >
+              Deseja mover <strong style={{ color: "#f8fafc" }}>{pendingMove.taskLocation}</strong> de <strong style={{ color: "#f8fafc" }}>{parseDateLocal(pendingMove.fromDate).toLocaleDateString("pt-BR")}</strong> para <strong style={{ color: "#f8fafc" }}>{parseDateLocal(pendingMove.toDate).toLocaleDateString("pt-BR")}</strong>?
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 10,
+                marginTop: 20,
+              }}
+            >
+              <button
+                onClick={() => setPendingMove(null)}
+                style={{
+                  background: "rgba(148,163,184,0.08)",
+                  color: "#e2e8f0",
+                  border: "1px solid rgba(148,163,184,0.18)",
+                  borderRadius: 10,
+                  padding: "10px 14px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmMoveTask}
+                style={{
+                  background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 10,
+                  padding: "10px 14px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  boxShadow: "0 10px 24px rgba(59,130,246,0.35)",
+                }}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div
+        onClick={onClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onMouseDown={(e) => {
+          (e.currentTarget as HTMLDivElement).style.transform = "scale(0.97)";
+        }}
+        onMouseUp={(e) => {
+          (e.currentTarget as HTMLDivElement).style.transform = "scale(1)";
+        }}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setIsDragOver(true);
+        }}
+        onDragLeave={() => setIsDragOver(false)}
+        onDrop={handleDrop}
+        style={{
         minHeight,
         borderRadius: isMobile ? 8 : 10,
         padding,
@@ -123,6 +296,21 @@ export function CalendarDayCell({
             height: 2,
             borderRadius: "0 0 3px 3px",
             background: "rgba(148,163,184,0.4)",
+          }}
+        />
+      )}
+
+      {isHolidayDay && (
+        <div
+          style={{
+            position: "absolute",
+            top: 4,
+            right: 6,
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: "#facc15",
+            boxShadow: "0 0 8px rgba(250,204,21,0.75)",
           }}
         />
       )}
@@ -173,6 +361,26 @@ export function CalendarDayCell({
         )}
       </div>
 
+      {isHolidayDay && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+            fontSize: 9,
+            fontWeight: 700,
+            color: "#facc15",
+            background: "rgba(250,204,21,0.12)",
+            borderRadius: 5,
+            padding: "2px 5px",
+            lineHeight: 1.2,
+          }}
+        >
+          <span>🇧🇷</span>
+          <span>Feriado</span>
+        </div>
+      )}
+
       {/* 📌 Task pills */}
       {visibleTasks.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -181,6 +389,16 @@ export function CalendarDayCell({
             return (
               <div
                 key={task?.id ?? i}
+                draggable={task.status !== "concluido"}
+                onDragStart={(event) => {
+                  if (task.status === "concluido") {
+                    event.preventDefault();
+                    return;
+                  }
+                  event.dataTransfer.setData("text/task-id", task.id);
+                  event.dataTransfer.effectAllowed = "move";
+                  event.stopPropagation();
+                }}
                 style={{
                   fontSize: 10,
                   fontWeight: 500,
@@ -191,6 +409,7 @@ export function CalendarDayCell({
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
+                  cursor: "grab",
                 }}
               >
                 {task?.location ?? "Sem local"}
@@ -212,6 +431,7 @@ export function CalendarDayCell({
           +{extraCount} mais
         </span>
       )}
-    </div>
+      </div>
+    </>
   );
 }

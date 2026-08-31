@@ -5,12 +5,15 @@ import { parseDateLocal } from "../../lib/date";
 import { useTaskDetailsModal } from "../../hooks/useDetailsTaskModal";
 import { TaskDetailsModal } from "../modals/DetailsTaskModal";
 import type { Task } from "../../features/tasks/task.types";
+import type { Holiday } from "../../features/holidays/holiday.types";
 import type { TaskFilter } from "../../utils/task";
 import { getTaskDisplayId } from "../../utils/task";
+import { getHolidayByDate } from "../../features/holidays/holiday.utils";
 
 type Props = {
   selectedDate: Date | null;
   tasks: Task[];
+  holidays?: Holiday[];
   isMobile?: boolean;
   isTablet?: boolean;
   filter?: TaskFilter;
@@ -124,13 +127,15 @@ function TaskCard({
   index,
   isMobile,
   animKey,
-  onClick
+  onClick,
+  onDragStart,
 }: {
   task: Task;
   index: number;
   isMobile: boolean;
   animKey: string;
   onClick?: (task: Task) => void;
+  onDragStart?: (event: React.DragEvent<HTMLDivElement>, task: Task) => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const status = getStatusStyle(task.status);
@@ -151,6 +156,16 @@ function TaskCard({
   return (
     <div
       key={animKey + index}
+      draggable={task.status !== "concluido"}
+      onDragStart={(event) => {
+        if (task.status === "concluido") {
+          event.preventDefault();
+          return;
+        }
+        event.dataTransfer.setData("text/task-id", task.id);
+        event.dataTransfer.effectAllowed = "move";
+        onDragStart?.(event, task);
+      }}
       onClick={() => onClick?.(task)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -281,6 +296,7 @@ function TaskCard({
 export function CalendarSidePanel({
   selectedDate,
   tasks,
+  holidays = [],
   isMobile = false,
   isTablet = false,
   filter = "todas",
@@ -309,6 +325,8 @@ export function CalendarSidePanel({
   }, [selectedDate]);
 
   if (!selectedDate) return <EmptyPrompt isMobile={isMobile} />;
+
+  const holiday = getHolidayByDate(selectedDate, holidays);
 
   const dayTasks = tasks.filter((t) => {
     if (!t?.date) return false;
@@ -490,6 +508,27 @@ export function CalendarSidePanel({
           scrollBehavior: "smooth",
         }}
       >
+        {holiday && (
+          <div
+            style={{
+              background: "rgba(250,204,21,0.1)",
+              border: "1px solid rgba(250,204,21,0.28)",
+              borderRadius: 12,
+              padding: "10px 12px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              color: "#facc15",
+              fontSize: 12,
+              fontWeight: 600,
+              lineHeight: 1.4,
+            }}
+          >
+            <span aria-label="feriado">🇧🇷</span>
+            <span>{holiday.name}</span>
+          </div>
+        )}
+
         {sortedTasks.length === 0 ? (
           <div
             style={{
@@ -536,6 +575,10 @@ export function CalendarSidePanel({
               isMobile={isMobile}
               animKey={animKey}
               onClick={onTaskClick ?? openDetails}
+              onDragStart={(event) => {
+                event.dataTransfer.setData("text/task-id", task.id);
+                event.dataTransfer.effectAllowed = "move";
+              }}
             />
           ))
         )}

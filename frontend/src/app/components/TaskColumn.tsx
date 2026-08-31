@@ -7,6 +7,7 @@ type Props = {
   icon: string;
   tasks: Task[];
   highlight?: boolean;
+  holidayLabel?: string;
   onTaskClick?: (task: Task) => void;
 };
 
@@ -34,20 +35,22 @@ const columnIcons: Record<string, React.ReactNode> = {
   ),
 };
 
-export function TaskColumn({ title, icon, tasks, highlight, onTaskClick }: Props) {
+export function TaskColumn({ title, icon, tasks, highlight, holidayLabel, onTaskClick }: Props) {
   const svgIcon = columnIcons[title];
+  const isHolidayColumn = Boolean(holidayLabel);
 
   return (
     <div
       style={{
         flex: 1,
-        minHeight: 0, // 🔥 ESSENCIAL PRA FUNCIONAR O SCROLL
+        minHeight: 0,
         display: "flex",
         flexDirection: "column",
-        background: "rgba(255,255,255,0.025)",
+        background: isHolidayColumn ? "rgba(250,204,21,0.08)" : "rgba(255,255,255,0.025)",
         borderRadius: 13,
         padding: "14px 12px",
-        border: "1px solid rgba(255,255,255,0.06)",
+        border: isHolidayColumn ? "1px solid rgba(250,204,21,0.35)" : "1px solid rgba(255,255,255,0.06)",
+        boxShadow: isHolidayColumn ? "inset 0 0 0 1px rgba(250,204,21,0.08)" : "none",
       }}
     >
       {/* HEADER */}
@@ -64,7 +67,7 @@ export function TaskColumn({ title, icon, tasks, highlight, onTaskClick }: Props
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <span
             style={{
-              color: highlight ? "#94a3b8" : "rgba(148,163,184,0.5)",
+              color: isHolidayColumn ? "#facc15" : highlight ? "#94a3b8" : "rgba(148,163,184,0.5)",
               display: "flex",
               alignItems: "center",
             }}
@@ -76,7 +79,7 @@ export function TaskColumn({ title, icon, tasks, highlight, onTaskClick }: Props
             style={{
               fontSize: 13,
               fontWeight: 600,
-              color: highlight ? "#e2e8f0" : "rgba(226,232,240,0.7)",
+              color: isHolidayColumn ? "#fef3c7" : highlight ? "#e2e8f0" : "rgba(226,232,240,0.7)",
               letterSpacing: "-0.01em",
             }}
           >
@@ -92,17 +95,23 @@ export function TaskColumn({ title, icon, tasks, highlight, onTaskClick }: Props
             padding: "3px 9px",
             borderRadius: 6,
             background:
-              highlight && tasks.length > 0
-                ? "rgba(241,245,249,0.12)"
-                : "rgba(255,255,255,0.06)",
+              isHolidayColumn
+                ? "rgba(250,204,21,0.18)"
+                : highlight && tasks.length > 0
+                  ? "rgba(241,245,249,0.12)"
+                  : "rgba(255,255,255,0.06)",
             color:
-              highlight && tasks.length > 0
-                ? "#f1f5f9"
-                : "rgba(148,163,184,0.5)",
+              isHolidayColumn
+                ? "#facc15"
+                : highlight && tasks.length > 0
+                  ? "#f1f5f9"
+                  : "rgba(148,163,184,0.5)",
             border:
-              highlight && tasks.length > 0
-                ? "1px solid rgba(241,245,249,0.15)"
-                : "1px solid rgba(255,255,255,0.07)",
+              isHolidayColumn
+                ? "1px solid rgba(250,204,21,0.35)"
+                : highlight && tasks.length > 0
+                  ? "1px solid rgba(241,245,249,0.15)"
+                  : "1px solid rgba(255,255,255,0.07)",
             minWidth: 26,
             textAlign: "center",
           }}
@@ -110,6 +119,24 @@ export function TaskColumn({ title, icon, tasks, highlight, onTaskClick }: Props
           {tasks.length}
         </span>
       </div>
+
+      {isHolidayColumn && holidayLabel && (
+        <div
+          style={{
+            marginBottom: 10,
+            padding: "6px 8px",
+            borderRadius: 8,
+            background: "rgba(250,204,21,0.12)",
+            border: "1px solid rgba(250,204,21,0.25)",
+            color: "#fef3c7",
+            fontSize: 10,
+            fontWeight: 700,
+            lineHeight: 1.3,
+          }}
+        >
+          🇧🇷 {holidayLabel}
+        </div>
+      )}
 
       {/* LISTA DE TASKS (COM SCROLL) */}
       <div

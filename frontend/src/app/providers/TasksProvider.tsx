@@ -13,6 +13,7 @@ import {
 } from "react";
 
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 import type { Task } from "../features/tasks/task.types";
 import { normalizeTask, normalizeTaskList, type TaskFilter, type TaskTypeFilter } from "../utils/task";
 import * as service from "../features/tasks/task.service";
@@ -43,6 +44,7 @@ const TasksContext = createContext<TasksContextValue | undefined>(undefined);
 
 export function TasksProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const { showToast } = useToast();
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<TaskFilter>("todas");
@@ -77,12 +79,14 @@ export function TasksProvider({ children }: { children: ReactNode }) {
         const payload = newTask?.data ?? newTask;
         if (payload) {
           setTasks((prev) => [...prev, normalizeTask(payload)]);
+          showToast("Task criada com sucesso!", "success");
         }
       } catch (err) {
         console.error(err);
+        showToast("Não foi possível criar a task", "error");
       }
     },
-    []
+    [showToast]
   );
 
   const updateTask = useCallback(
@@ -97,11 +101,19 @@ export function TasksProvider({ children }: { children: ReactNode }) {
         setTasks((prev) =>
           prev.map((t) => (t.id === id ? normalizeTask(payload) : t))
         );
+
+        const nextStatus = payload?.status ?? data.status;
+        if (nextStatus === "concluido") {
+          showToast("Task concluída!", "success");
+        } else if (nextStatus === "pendente") {
+          showToast("Task reaberta!", "info");
+        }
       } catch (err) {
         console.error(err);
+        showToast("Não foi possível atualizar a task", "error");
       }
     },
-    []
+    [showToast]
   );
 
   const toggleTaskStatus = useCallback(
@@ -115,10 +127,12 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     try {
       await service.deleteTask(id);
       setTasks((prev) => prev.filter((t) => t.id !== id));
+      showToast("Task excluída!", "success");
     } catch (err) {
       console.error(err);
+      showToast("Não foi possível excluir a task", "error");
     }
-  }, []);
+  }, [showToast]);
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {

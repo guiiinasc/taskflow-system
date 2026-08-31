@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { Task } from "../../features/tasks/task.types";
+import { getHolidayByDate } from "../../features/holidays/holiday.utils";
+import { useHolidays } from "../../providers/HolidaysProvider";
 import { toLocalDateString } from "../../utils/date";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -130,6 +132,7 @@ function FieldError({ message }: { message: string }) {
 
 export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Props) {
   useInjectModalStyles();
+  const { holidays, ensureYear } = useHolidays();
 
   // Form state
   const [title, setTitle] = useState("");
@@ -164,6 +167,24 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
       setDate(getTodayDateString());
     }
   }, [defaultDate]);
+
+  useEffect(() => {
+    if (!date) return;
+
+    const year = Number(date.slice(0, 4));
+    if (Number.isFinite(year)) {
+      void ensureYear(year);
+    }
+  }, [date, ensureYear]);
+
+  const holiday = getHolidayByDate(date, holidays);
+  const holidayDateLabel = date
+    ? new Date(`${date}T12:00:00`).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "";
 
   // Autofocus location on open
   useEffect(() => {
@@ -596,6 +617,29 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
               }}
             />
             {errors.date && <FieldError message={errors.date} />}
+
+            {holiday && (
+              <div
+                style={{
+                  marginTop: 8,
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 8,
+                  background: "rgba(250,204,21,0.1)",
+                  border: "1px solid rgba(250,204,21,0.3)",
+                  borderRadius: 10,
+                  padding: "8px 10px",
+                  color: "#fef3c7",
+                  fontSize: 12,
+                  lineHeight: 1.4,
+                }}
+              >
+                <span aria-label="aviso de feriado">⚠️</span>
+                <span>
+                  {holidayDateLabel} é feriado: {holiday.name}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Status toggle */}

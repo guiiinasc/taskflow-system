@@ -12,6 +12,7 @@ import { TaskDetailsModal } from "../components/modals/DetailsTaskModal";
 import { useNewTaskModal } from "../hooks/useNewTaskModal";
 import { useTaskDetailsModal } from "../hooks/useDetailsTaskModal";
 import { useTasks } from "../hooks/useTasks";
+import { useHolidays } from "../providers/HolidaysProvider";
 import { toLocalDateString } from "../lib/date";
 
 function formatBrasiliaDateTime(date: Date) {
@@ -27,6 +28,7 @@ function formatBrasiliaDateTime(date: Date) {
 
 export default function CalendarPage() {
   const { tasks, filter, setFilter, addTask } = useTasks();
+  const { holidays, ensureYear, error: holidaysError } = useHolidays();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
@@ -72,6 +74,10 @@ export default function CalendarPage() {
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    void ensureYear(currentDate.getFullYear());
+  }, [currentDate, ensureYear]);
 
   return (
     <div
@@ -187,6 +193,17 @@ export default function CalendarPage() {
               >
                 Brasília • {brasiliaDateTime}
               </p>
+              {holidaysError && (
+                <p
+                  style={{
+                    margin: "8px 0 0",
+                    fontSize: 11,
+                    color: "#fca5a5",
+                  }}
+                >
+                  Não foi possível carregar os feriados.
+                </p>
+              )}
             </div>
 
             <CalendarHeader
@@ -200,6 +217,7 @@ export default function CalendarPage() {
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
               tasks={tasks}
+              holidays={holidays}
               isMobile={isMobile}
               isTablet={isTablet}
             />
@@ -209,6 +227,7 @@ export default function CalendarPage() {
           <CalendarSidePanel
             selectedDate={selectedDate}
             tasks={tasks}
+            holidays={holidays}
             isMobile={isMobile}
             isTablet={isTablet}
             filter={filter}

@@ -14,6 +14,8 @@ import { useTaskDetailsModal } from "../hooks/useDetailsTaskModal";
 import { TaskDetailsModal } from "../components/modals/DetailsTaskModal";
 
 import { useTasks } from "../hooks/useTasks";
+import { useHolidays } from "../providers/HolidaysProvider";
+import { getHolidayByDate } from "../features/holidays/holiday.utils";
 import { groupTasks, getTaskStats } from "../utils/task";
 import { useEffect, useState } from "react";
 import type { TaskTypeFilter } from "../utils/task";
@@ -33,6 +35,7 @@ function formatBrasiliaDateTime(date: Date) {
 
 export default function Dashboard() {
   const { tasks, allTasks, filter, setFilter, addTask, typeFilter, setTypeFilter } = useTasks();
+  const { holidays, ensureYear } = useHolidays();
 
   const { user } = useAuth();
   const {
@@ -85,6 +88,26 @@ export default function Dashboard() {
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    void ensureYear(new Date().getFullYear());
+  }, [ensureYear]);
+
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  const upcomingWindowEnd = new Date(today);
+  upcomingWindowEnd.setDate(today.getDate() + 5);
+
+  const todayHoliday = getHolidayByDate(today, holidays);
+  const tomorrowHoliday = getHolidayByDate(tomorrow, holidays);
+
+  const upcomingHoliday = Array.from({ length: 5 }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() + index + 1);
+    return getHolidayByDate(date, holidays);
+  }).find(Boolean);
 
   return (
     <div
@@ -263,21 +286,24 @@ export default function Dashboard() {
                   icon="📅"
                   tasks={grouped.today}
                   highlight
-                  onTaskClick={openDetails} // 👈 NOVO
+                  holidayLabel={todayHoliday?.name}
+                  onTaskClick={openDetails}
                 />
 
                 <TaskColumn
                   title="Amanhã"
                   icon="📆"
                   tasks={grouped.tomorrow}
-                  onTaskClick={openDetails} // 👈 NOVO
+                  holidayLabel={tomorrowHoliday?.name}
+                  onTaskClick={openDetails}
                 />
 
                 <TaskColumn
                   title="Próximos"
                   icon="➡️"
                   tasks={grouped.upcoming}
-                  onTaskClick={openDetails} // 👈 NOVO
+                  holidayLabel={upcomingHoliday?.name}
+                  onTaskClick={openDetails}
                 />
               </div>
             </>
