@@ -1,17 +1,18 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import axios from "axios";
+import { api } from "../lib/api";
 
 type User = {
   id: string;
   email: string;
+  name?: string;
 };
 
 type AuthContextType = {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -47,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error("Preencha todos os campos");
     }
 
-    const response = await axios.post("http://localhost:3333/auth/login", {
+    const response = await api.post("/auth/login", {
       email,
       password,
     });
@@ -69,12 +70,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(realUser);
   };
 
-  const register = async (email: string, password: string) => {
-    if (!email || !password) {
-      throw new Error("Preencha todos os campos");
+  const register = async (name: string, email: string, password: string) => {
+    if (!name || !email || !password) {
+      throw new Error("Preencha nome, e-mail e senha");
     }
 
-    await axios.post("http://localhost:3333/auth/register", {
+    await api.post("/auth/register", {
+      name,
       email,
       password,
     });

@@ -13,6 +13,7 @@ type Props = {
 export function AuthModal({ isOpen, mode, setMode, onClose }: Props) {
   const { login, register } = useAuth();
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,9 @@ export function AuthModal({ isOpen, mode, setMode, onClose }: Props) {
 
   useEffect(() => {
     setError("");
+    setName("");
+    setEmail("");
+    setPassword("");
   }, [mode, isOpen]);
 
   useEffect(() => {
@@ -42,7 +46,7 @@ export function AuthModal({ isOpen, mode, setMode, onClose }: Props) {
       if (mode === "login") {
         await login(email, password);
       } else {
-        await register(email, password);
+        await register(name, email, password);
       }
       onClose();
     } catch (err: unknown) {
@@ -211,6 +215,27 @@ export function AuthModal({ isOpen, mode, setMode, onClose }: Props) {
 
               {/* Inputs */}
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {!isLogin && (
+                  <input
+                    className="auth-input"
+                    type="text"
+                    placeholder="Nome"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                    style={{
+                      width: "100%",
+                      padding: "11px 14px",
+                      borderRadius: 10,
+                      background: "#020617",
+                      border: "1px solid rgba(255,255,255,0.07)",
+                      color: "#f1f5f9",
+                      fontSize: 14,
+                      fontFamily: "inherit",
+                      transition: "border-color 0.2s, box-shadow 0.2s",
+                    }}
+                  />
+                )}
                 <input
                   className="auth-input"
                   type="email"

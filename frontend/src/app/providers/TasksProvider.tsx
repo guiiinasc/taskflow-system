@@ -14,7 +14,7 @@ import {
 
 import { useAuth } from "../contexts/AuthContext";
 import type { Task } from "../features/tasks/task.types";
-import type { TaskFilter, TaskTypeFilter } from "../utils/task";
+import { normalizeTask, normalizeTaskList, type TaskFilter, type TaskTypeFilter } from "../utils/task";
 import * as service from "../features/tasks/task.service";
 
 type TasksContextValue = {
@@ -53,16 +53,18 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     async function load() {
       try {
         const data = await service.getTasks();
-        setTasks(data.data || data);
+        const normalized = normalizeTaskList(data?.data ?? data ?? []);
+        setTasks(normalized);
       } catch (err) {
         console.error("Erro ao carregar tasks", err);
+        setTasks([]);
       }
     }
 
     if (user) {
       load();
     } else {
-      setTasks([]); // limpa quando não tem user
+      setTasks([]);
     }
   }, [user]);
 
@@ -72,7 +74,10 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     ) => {
       try {
         const newTask = await service.createTask(taskData);
-        setTasks((prev) => [...prev, newTask.data || newTask]);
+        const payload = newTask?.data ?? newTask;
+        if (payload) {
+          setTasks((prev) => [...prev, normalizeTask(payload)]);
+        }
       } catch (err) {
         console.error(err);
       }
@@ -88,8 +93,9 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       try {
         const updated = await service.updateTask(id, data);
 
+        const payload = updated?.data ?? updated;
         setTasks((prev) =>
-          prev.map((t) => (t.id === id ? updated.data || updated : t))
+          prev.map((t) => (t.id === id ? normalizeTask(payload) : t))
         );
       } catch (err) {
         console.error(err);

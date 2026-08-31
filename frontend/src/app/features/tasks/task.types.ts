@@ -9,6 +9,7 @@ export type TaskType = "entrega" | "manutencao" | "outro";
 export interface Task {
   id: string;
   userId: string;
+  title: string;
   location: string;
   quantity?: number;
   description?: string;

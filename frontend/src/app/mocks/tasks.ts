@@ -30,6 +30,7 @@ function seedTask(task: Omit<Task, "createdAt" | "updatedAt" | "userId">): Task 
 export const tasks: Task[] = [
   seedTask({
     id: "1",
+    title: "Entrega de mercadorias",
     location: "Mercado Silva",
     quantity: 20,
     date: today,
@@ -38,6 +39,7 @@ export const tasks: Task[] = [
   }),
   seedTask({
     id: "2",
+    title: "Manutenção de freezer",
     location: "Mercado XPTO",
     quantity: 15,
     date: today,
@@ -46,6 +48,7 @@ export const tasks: Task[] = [
   }),
   seedTask({
     id: "3",
+    title: "Reabastecimento urgente",
     location: "Mercado ABC",
     quantity: 25,
     date: today,
@@ -54,6 +57,7 @@ export const tasks: Task[] = [
   }),
   seedTask({
     id: "4",
+    title: "Entrega de perecíveis",
     location: "Mercado Central",
     quantity: 10,
     date: tomorrow,
@@ -62,6 +66,7 @@ export const tasks: Task[] = [
   }),
   seedTask({
     id: "5",
+    title: "Checklist de manutenção",
     location: "Posto Energia",
     date: tomorrow,
     type: "manutencao",
@@ -69,6 +74,7 @@ export const tasks: Task[] = [
   }),
   seedTask({
     id: "6",
+    title: "Entrega de cesta básica",
     location: "Mercado Norte",
     quantity: 50,
     date: nextDays,
@@ -77,6 +83,7 @@ export const tasks: Task[] = [
   }),
   seedTask({
     id: "7",
+    title: "Reparo de sistema elétrico",
     location: "Loja Tech",
     date: nextDays,
     type: "manutencao",
@@ -84,6 +91,7 @@ export const tasks: Task[] = [
   }),
   seedTask({
     id: "8",
+    title: "Entrega em grande volume",
     location: "Distribuidora Max",
     quantity: 80,
     date: future,
@@ -92,6 +100,7 @@ export const tasks: Task[] = [
   }),
   seedTask({
     id: "9",
+    title: "Manutenção preventiva",
     location: "Supermercado Bom Preço",
     date: future,
     type: "manutencao",
@@ -99,6 +108,7 @@ export const tasks: Task[] = [
   }),
   seedTask({
     id: "10",
+    title: "Entrega volumosa",
     location: "Distribuidora Max",
     quantity: 80,
     date: future,
@@ -107,6 +117,7 @@ export const tasks: Task[] = [
   }),
   seedTask({
     id: "12",
+    title: "Entrega para loja regional",
     location: "Distribuidora Max",
     quantity: 80,
     date: future,
@@ -115,6 +126,7 @@ export const tasks: Task[] = [
   }),
   seedTask({
     id: "13",
+    title: "Inspeção de manutenção",
     location: "Distribuidora Max",
     quantity: 80,
     date: future,

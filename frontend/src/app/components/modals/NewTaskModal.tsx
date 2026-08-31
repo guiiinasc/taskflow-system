@@ -132,6 +132,7 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
   useInjectModalStyles();
 
   // Form state
+  const [title, setTitle] = useState("");
   const [location,    setLocation]    = useState("");
   const [description, setDescription] = useState("");
   const [taskType,    setTaskType]    = useState<TaskType>("entrega");
@@ -141,8 +142,9 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
   const [status,      setStatus]      = useState<TaskStatus>("pendente");
 
   // UI state
-  const [errors,    setErrors]    = useState<{ location?: string; type?: string; customType?: string; quantity?: string; date?: string }>({});
+  const [errors,    setErrors]    = useState<{ title?: string; location?: string; type?: string; customType?: string; quantity?: string; date?: string }>({});
   const [closing,   setClosing]   = useState(false);
+  const [titleFocus, setTitleFocus] = useState(false);
   const [locationFocus, setLocationFocus] = useState(false);
   const [descFocus,  setDescFocus]  = useState(false);
   const [customTypeFocus, setCustomTypeFocus] = useState(false);
@@ -168,6 +170,7 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
     if (isOpen) {
       setClosing(false);
       // Reset form on each open
+      setTitle("");
       setLocation("");
       setDescription("");
       setTaskType("entrega");
@@ -206,7 +209,8 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
 
   // Validation
   function validate(): boolean {
-    const newErrors: { location?: string; type?: string; customType?: string; quantity?: string; date?: string } = {};
+    const newErrors: { title?: string; location?: string; type?: string; customType?: string; quantity?: string; date?: string } = {};
+    if (!title.trim()) newErrors.title = "O título da task é obrigatório";
     if (!location.trim())  newErrors.location = "O local da task é obrigatório";
     if (!taskType)         newErrors.type  = "O tipo da task é obrigatório";
     if (taskType === "outro" && !customType.trim()) {
@@ -227,10 +231,11 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
   function handleSubmit() {
     if (!validate()) return;
     onCreate({
+      title: title.trim(),
       location:    location.trim(),
       description: description.trim() || undefined,
       quantity:    taskType === "entrega" ? Number(quantity) : undefined,
-      date,
+      date: date,
       status,
       type: taskType,
       customType: taskType === "outro" ? customType.trim() || undefined : undefined,
@@ -241,6 +246,7 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
   if (!isOpen && !closing) return null;
 
   const isValid =
+    title.trim().length > 0 &&
     location.trim().length > 0 &&
     (taskType !== "entrega" || quantity.trim().length > 0) &&
     date.length > 0 &&
@@ -342,6 +348,37 @@ export function NewTaskModal({ isOpen, onClose, onCreate, defaultDate = "" }: Pr
 
         {/* ── Form ─────────────────────────────────────────────────────── */}
         <div style={{ padding: "20px 20px 0" }}>
+
+          {/* Title */}
+          <div style={{ marginBottom: 16 }}>
+            <FieldLabel>Título <span style={{ color: "#f87171" }}>*</span></FieldLabel>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (errors.title) setErrors((p) => ({ ...p, title: undefined }));
+              }}
+              onFocus={() => setTitleFocus(true)}
+              onBlur={() => setTitleFocus(false)}
+              placeholder="Ex.: Entrega de materiais"
+              maxLength={120}
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                borderRadius: TOKEN.radiusSm,
+                border: `1px solid ${errors.title ? TOKEN.borderError : titleFocus ? TOKEN.borderFocus : TOKEN.border}`,
+                background: titleFocus ? TOKEN.bgInputHover : TOKEN.bgInput,
+                color: TOKEN.textPrimary,
+                fontSize: 13,
+                fontFamily: "inherit",
+                outline: "none",
+                transition: "border-color 0.15s ease, background 0.15s ease",
+                boxShadow: titleFocus ? "0 0 0 3px rgba(56,189,248,0.08)" : "none",
+              }}
+            />
+            {errors.title && <FieldError message={errors.title} />}
+          </div>
 
           {/* Location */}
           <div style={{ marginBottom: 16 }}>

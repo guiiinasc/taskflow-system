@@ -1,33 +1,57 @@
-import axios from "axios";
+import { api } from "../../lib/api";
+import { parseDateLocal } from "../../utils/date";
 
-const api = axios.create({
-  baseURL: "http://localhost:3333",
-});
+function isAuthError(error: unknown) {
+  return typeof error === "object" && error !== null && "response" in error &&
+    typeof (error as { response?: { status?: number } }).response?.status === "number" &&
+    (error as { response?: { status?: number } }).response?.status === 401;
+}
 
-// injeta token automaticamente
-api.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+function toPersistedDate(dateValue: string) {
+  const raw = String(dateValue ?? "").trim();
+  if (!raw) return new Date();
+
+  const [year, month, day] = raw.split("-").map(Number);
+  if ([year, month, day].every((part) => Number.isFinite(part))) {
+    return new Date(year, month - 1, day);
   }
-  return config;
-});
+
+  return parseDateLocal(raw);
+}
 
 // TASKS API
 export async function getTasks() {
-  const res = await api.get("/api/tasks");
-  return res.data;
+  try {
+    const res = await api.get("/api/tasks");
+    return res.data;
+  } catch (error) {
+    if (isAuthError(error)) {
+      return { data: [] };
+    }
+    throw error;
+  }
 }
 
 export async function createTask(data: any) {
-  const res = await api.post("/api/tasks", data);
-  return res.data;
+  try {
+    const res = await api.post("/api/tasks", {
+      ...data,
+      date: toPersistedDate(data.date).toISOString(),
+    });
+    return res.data;
+  } catch (error) {
+    if (isAuthError(error)) {
+      return { data: null, message: "Faça login para criar tarefas", error: "Unauthorized" };
+    }
+    throw error;
+  }
 }
 
 export async function updateTask(id: string, data: any) {
-  const res = await api.put(`/api/tasks/${id}`, data);
+  const res = await api.put(`/api/tasks/${id}`, {
+    ...data,
+    date: data.date ? toPersistedDate(data.date).toISOString() : data.date,
+  });
   return res.data;
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useAuthModal } from "../hooks/useAuthModal";
 import type { TaskFilter } from "../utils/task";
@@ -13,8 +14,25 @@ type Props = {
 };
 
 export function Header({ filter, setFilter, onMenuClick, isMobile }: Props) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { openLogin, openRegister } = useAuthModal();
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+
+  const handleProfileClick = () => {
+    if (!user) {
+      setIsProfileMenuOpen(false);
+      openLogin();
+      return;
+    }
+
+    setIsProfileMenuOpen((prev) => !prev);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsProfileMenuOpen(false);
+  };
+
   return (
     <div
       style={{
@@ -203,11 +221,9 @@ export function Header({ filter, setFilter, onMenuClick, isMobile }: Props) {
         })}
 
         {/* PERFIL / LOGIN */}
-        <div>
+        <div style={{ position: "relative" }}>
           <div
-            onClick={() => {
-              if (!user) openLogin();
-            }}
+            onClick={handleProfileClick}
             title={user ? user.email : "Entrar"}
             style={{
               width: 32,
@@ -222,11 +238,57 @@ export function Header({ filter, setFilter, onMenuClick, isMobile }: Props) {
               fontWeight: 700,
               color: "#e2e8f0",
               cursor: "pointer",
+              userSelect: "none",
             }}
           >
             {user ? user.email.charAt(0).toUpperCase() : "→"}
           </div>
-          
+
+          {user && isProfileMenuOpen && (
+            <div
+              style={{
+                position: "absolute",
+                right: 0,
+                top: "calc(100% + 8px)",
+                minWidth: 150,
+                background: "#111827",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 10,
+                boxShadow: "0 12px 32px rgba(15, 23, 42, 0.45)",
+                overflow: "hidden",
+                zIndex: 50,
+              }}
+            >
+              <div
+                style={{
+                  padding: "10px 12px",
+                  borderBottom: "1px solid rgba(255,255,255,0.08)",
+                  color: "#e2e8f0",
+                  fontSize: 12,
+                  fontWeight: 600,
+                }}
+              >
+                {user.email}
+              </div>
+
+              <button
+                onClick={handleLogout}
+                style={{
+                  width: "100%",
+                  border: "none",
+                  background: "transparent",
+                  color: "#fca5a5",
+                  textAlign: "left",
+                  padding: "10px 12px",
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: 600,
+                }}
+              >
+                Sair
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

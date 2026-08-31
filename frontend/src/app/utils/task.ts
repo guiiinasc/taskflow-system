@@ -38,8 +38,18 @@ export function normalizeTaskDate(value: unknown): string {
 
   if (!raw) return toLocalDateString(new Date());
 
-  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (match) return raw;
+  const directMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (directMatch) return raw;
+
+  const isoLike = raw.match(/^(\d{4})-(\d{2})-(\d{2})T/);
+  if (isoLike) {
+    return raw.slice(0, 10);
+  }
+
+  const dateValue = new Date(raw);
+  if (!Number.isNaN(dateValue.getTime())) {
+    return toLocalDateString(dateValue);
+  }
 
   return toLocalDateString(new Date());
 }
@@ -65,6 +75,7 @@ export function normalizeTask(raw: Partial<Task> & Record<string, unknown>, fall
   return {
     id: typeof raw.id === "string" ? raw.id : generateTaskId(),
     userId: typeof raw.userId === "string" && raw.userId.trim() ? raw.userId : fallbackUserId,
+    title: typeof raw.title === "string" && raw.title.trim() ? raw.title.trim() : "Tarefa",
     location: String(raw.location ?? "").trim(),
     quantity: normalizedType === "entrega" ? quantity : undefined,
     description: typeof raw.description === "string" && raw.description.trim() ? raw.description.trim() : undefined,
@@ -88,24 +99,21 @@ export function groupTasks(tasks: Task[]) {
 
   const today = toLocalDateString(now);
 
-  const tomorrowDate = new Date(Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate() + 1
-  ));
+  const tomorrowDate = new Date(now);
+  tomorrowDate.setDate(now.getDate() + 1);
   const tomorrow = toLocalDateString(tomorrowDate);
 
-  const upcomingEndDate = new Date(Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate() + 6
-  ));
+  const upcomingEndDate = new Date(now);
+  upcomingEndDate.setDate(now.getDate() + 6);
   const upcomingEnd = toLocalDateString(upcomingEndDate);
 
   return {
-    today: tasks.filter((t) => t.date === today),
-    tomorrow: tasks.filter((t) => t.date === tomorrow),
-    upcoming: tasks.filter((t) => t.date > tomorrow && t.date <= upcomingEnd),
+    today: tasks.filter((t) => normalizeTaskDate(t.date) === today),
+    tomorrow: tasks.filter((t) => normalizeTaskDate(t.date) === tomorrow),
+    upcoming: tasks.filter((t) => {
+      const taskDate = normalizeTaskDate(t.date);
+      return taskDate > tomorrow && taskDate <= upcomingEnd;
+    }),
   };
 }
 
@@ -127,6 +135,7 @@ export function createTaskDraft(): Omit<Task, "id" | "userId" | "createdAt" | "u
   ));
 
   return {
+    title: "",
     location: "",
     quantity: undefined,
     description: undefined,
