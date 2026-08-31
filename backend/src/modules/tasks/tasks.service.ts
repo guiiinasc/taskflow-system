@@ -1,5 +1,17 @@
 import { prisma } from "../../config/prisma";
 
+function parseLocalDate(dateValue: string) {
+  const raw = String(dateValue ?? "").trim();
+  if (!raw) return new Date();
+
+  const [year, month, day] = raw.split("-").map(Number);
+  if ([year, month, day].every((part) => Number.isFinite(part))) {
+    return new Date(year, month - 1, day);
+  }
+
+  return new Date(raw);
+}
+
 export async function createTask(userId: string, data: any) {
   return prisma.task.create({
     data: {
@@ -8,7 +20,7 @@ export async function createTask(userId: string, data: any) {
       location: data.location,
       type: data.type,
       status: data.status ?? "pendente",
-      date: new Date(data.date),
+      date: parseLocalDate(data.date),
       time: data.time,
       quantity: data.quantity,
       userId,
@@ -44,7 +56,7 @@ export async function updateTask(userId: string, taskId: string, data: any) {
     where: { id: taskId },
     data: {
       ...data,
-      date: data.date ? new Date(data.date) : undefined,
+      date: data.date ? parseLocalDate(data.date) : undefined,
     },
   });
 }
