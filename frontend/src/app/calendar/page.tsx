@@ -84,7 +84,7 @@ export default function CalendarPage() {
       style={{
         display: "flex",
         height: "100vh",
-        background: "#0B1120",
+        background: "var(--bg-page)",
         overflow: "hidden",
       }}
     >
@@ -136,7 +136,7 @@ export default function CalendarPage() {
           flexDirection: "column",
           minWidth: 0,
           overflow: "hidden",
-          background: "linear-gradient(160deg, #0F172A 0%, #0B1120 60%, #0d1117 100%)",
+          background: "linear-gradient(160deg, var(--bg-page-2) 0%, var(--bg-page) 60%, var(--bg-page) 100%)",
         }}
       >
         {/* HEADER */}
@@ -177,7 +177,7 @@ export default function CalendarPage() {
                 style={{
                   fontSize: isMobile ? 16 : 20,
                   fontWeight: 700,
-                  color: "#f1f5f9",
+                  color: "var(--text-primary)",
                   letterSpacing: "-0.03em",
                   margin: 0,
                 }}
@@ -188,7 +188,7 @@ export default function CalendarPage() {
                 style={{
                   margin: "6px 0 0",
                   fontSize: 12,
-                  color: "rgba(148,163,184,0.65)",
+                  color: "var(--text-secondary)",
                 }}
               >
                 Brasília • {brasiliaDateTime}
@@ -209,6 +209,8 @@ export default function CalendarPage() {
             <CalendarHeader
               currentDate={currentDate}
               setCurrentDate={setCurrentDate}
+              holidays={holidays}
+              tasks={tasks}
               isMobile={isMobile}
             />
 

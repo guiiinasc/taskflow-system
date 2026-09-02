@@ -8,7 +8,6 @@ import { NewTaskModal } from "../components/modals/NewTaskModal";
 import { useNewTaskModal } from "../hooks/useNewTaskModal";
 import { useAuthModal } from "../hooks/useAuthModal";
 import { useAuth } from "../contexts/AuthContext";
-import { AuthModal } from "../components/modals/AuthModal";
 
 import { useTaskDetailsModal } from "../hooks/useDetailsTaskModal";
 import { TaskDetailsModal } from "../components/modals/DetailsTaskModal";
@@ -37,14 +36,8 @@ export default function Dashboard() {
   const { tasks, allTasks, filter, setFilter, addTask, typeFilter, setTypeFilter } = useTasks();
   const { holidays, ensureYear } = useHolidays();
 
-  const { user } = useAuth();
-  const {
-    isOpen: isAuthOpen,
-    mode,
-    openLogin,
-    openRegister,
-    close: closeAuth,
-  } = useAuthModal();
+  useAuth();
+  useAuthModal();
 
   const [view, setView] = useState<"dashboard" | "calendar">("dashboard");
   const [brasiliaDateTime, setBrasiliaDateTime] = useState(() =>
@@ -114,7 +107,7 @@ export default function Dashboard() {
       style={{
         display: "flex",
         height: "100vh",
-        background: "#0B1120",
+        background: "var(--bg-page)",
         overflow: "hidden",
       }}
     >
@@ -167,7 +160,7 @@ export default function Dashboard() {
           flexDirection: "column",
           overflow: "hidden",
           background:
-            "linear-gradient(160deg, #0F172A 0%, #0B1120 60%, #0d1117 100%)",
+            "linear-gradient(160deg, var(--bg-page-2) 0%, var(--bg-page) 60%, var(--bg-page) 100%)",
         }}
       >
         {/* HEADER */}
@@ -195,7 +188,7 @@ export default function Dashboard() {
     style={{
       fontSize: isMobile ? 16 : 20,
       fontWeight: 700,
-      color: "#f1f5f9",
+      color: "var(--text-primary)",
       letterSpacing: "-0.03em",
     }}
   >
@@ -205,7 +198,7 @@ export default function Dashboard() {
   <p
     style={{
       fontSize: 12,
-      color: "rgba(148,163,184,0.65)",
+      color: "var(--text-secondary)",
       margin: 0,
       marginBottom: 4,
     }}
@@ -216,7 +209,7 @@ export default function Dashboard() {
   <p
     style={{
       fontSize: 12,
-      color: "rgba(148,163,184,0.5)",
+      color: "var(--text-muted)",
       margin: 0,
       marginBottom: 12,
     }}
@@ -287,6 +280,7 @@ export default function Dashboard() {
                   tasks={grouped.today}
                   highlight
                   holidayLabel={todayHoliday?.name}
+                  holidayDate={todayHoliday?.date}
                   onTaskClick={openDetails}
                 />
 
@@ -295,6 +289,7 @@ export default function Dashboard() {
                   icon="📆"
                   tasks={grouped.tomorrow}
                   holidayLabel={tomorrowHoliday?.name}
+                  holidayDate={tomorrowHoliday?.date}
                   onTaskClick={openDetails}
                 />
 
@@ -303,6 +298,7 @@ export default function Dashboard() {
                   icon="➡️"
                   tasks={grouped.upcoming}
                   holidayLabel={upcomingHoliday?.name}
+                  holidayDate={upcomingHoliday?.date}
                   onTaskClick={openDetails}
                 />
               </div>

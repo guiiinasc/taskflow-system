@@ -88,8 +88,8 @@ function EmptyPrompt({ isMobile }: { isMobile: boolean }) {
     <div
       style={{
         width: isMobile ? "100%" : undefined,
-        background: "rgba(255,255,255,0.025)",
-        border: "1px solid rgba(255,255,255,0.07)",
+        background: "var(--bg-panel)",
+        border: "1px solid var(--bg-border-soft)",
         borderRadius: 13,
         display: "flex",
         flexDirection: "column",
@@ -170,8 +170,8 @@ function TaskCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.035)",
-        border: `1px solid ${hovered ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.08)"}`,
+        background: hovered ? "var(--bg-panel-strong)" : "var(--bg-panel)",
+        border: `1px solid ${hovered ? "var(--bg-border)" : "var(--bg-border-soft)"}`,
         borderRadius: 14,
         padding: isMobile ? "14px 14px" : "16px 16px",
         display: "flex",
@@ -180,8 +180,8 @@ function TaskCard({
         cursor: "pointer",
         transform: hovered ? "translateY(-2px)" : "translateY(0)",
         boxShadow: hovered
-          ? "0 12px 35px rgba(0,0,0,0.18)"
-          : "0 1px 0 rgba(255,255,255,0.04) inset",
+          ? "0 12px 35px var(--shadow-soft)"
+          : "0 1px 0 var(--bg-border-soft) inset",
         transition: "transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease",
         animation: `_sfp_cardIn 220ms ease-out both`,
         animationDelay: `${index * 36}ms`,
@@ -200,7 +200,7 @@ function TaskCard({
             style={{
               fontSize: 13,
               fontWeight: 700,
-              color: "#f8fafc",
+              color: "var(--text-primary)",
               letterSpacing: "-0.02em",
               lineHeight: 1.35,
               overflow: "hidden",
@@ -213,7 +213,7 @@ function TaskCard({
           <p
             style={{
               fontSize: 12,
-              color: "rgba(148,163,184,0.75)",
+              color: "var(--text-secondary)",
               lineHeight: 1.5,
               margin: 0,
               minHeight: 18,
@@ -230,9 +230,9 @@ function TaskCard({
           style={{
             fontSize: 10,
             fontWeight: 700,
-            color: "#cbd5e1",
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            color: "var(--text-secondary)",
+            background: "var(--bg-soft)",
+            border: "1px solid var(--bg-border-soft)",
             borderRadius: 999,
             padding: "6px 10px",
             textTransform: "capitalize",
@@ -249,7 +249,7 @@ function TaskCard({
           alignItems: "center",
           justifyContent: "space-between",
           gap: 10,
-          borderTop: "1px solid rgba(255,255,255,0.08)",
+          borderTop: "1px solid var(--bg-border-soft)",
           paddingTop: 10,
           marginTop: 2,
         }}
@@ -259,7 +259,7 @@ function TaskCard({
             display: "inline-flex",
             alignItems: "center",
             gap: 6,
-            color: "rgba(148,163,184,0.65)",
+            color: "var(--text-secondary)",
             fontSize: 11,
             fontWeight: 500,
           }}
@@ -381,8 +381,8 @@ export function CalendarSidePanel({
       <div
         style={{
           padding: isMobile ? "14px 16px 13px" : "16px 18px 14px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          background: "rgba(255,255,255,0.015)",
+          borderBottom: "1px solid var(--bg-border-soft)",
+          background: "var(--bg-soft)",
           flexShrink: 0,
         }}
       >
@@ -400,7 +400,7 @@ export function CalendarSidePanel({
               fontWeight: 600,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: "rgba(148,163,184,0.4)",
+              color: "var(--text-secondary)",
             }}
           >
             {weekday}
@@ -426,7 +426,7 @@ export function CalendarSidePanel({
           style={{
             fontSize: isMobile ? 14 : 15,
             fontWeight: 600,
-            color: "#f1f5f9",
+            color: "var(--text-primary)",
             letterSpacing: "-0.01em",
             marginBottom: 10,
           }}
@@ -445,7 +445,7 @@ export function CalendarSidePanel({
           <span
             style={{
               fontSize: 11,
-              color: "rgba(148,163,184,0.5)",
+              color: "var(--text-secondary)",
               display: "flex",
               alignItems: "center",
               gap: 5,
@@ -547,8 +547,8 @@ export function CalendarSidePanel({
                 width: 36,
                 height: 36,
                 borderRadius: 9,
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                background: "var(--bg-soft)",
+                border: "1px solid var(--bg-border-soft)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -560,7 +560,7 @@ export function CalendarSidePanel({
                 <rect x="9" y="3" width="6" height="4" rx="2" />
               </svg>
             </div>
-            <p style={{ fontSize: 12, color: "rgba(148,163,184,0.28)", textAlign: "center", lineHeight: 1.5 }}>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", lineHeight: 1.5 }}>
               {dayTasks.length > 0
                 ? "Nenhuma tarefa\nneste filtro"
                 : "Dia livre"}

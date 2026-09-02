@@ -8,6 +8,7 @@ type Props = {
   tasks: Task[];
   highlight?: boolean;
   holidayLabel?: string;
+  holidayDate?: string;
   onTaskClick?: (task: Task) => void;
 };
 
@@ -35,9 +36,12 @@ const columnIcons: Record<string, React.ReactNode> = {
   ),
 };
 
-export function TaskColumn({ title, icon, tasks, highlight, holidayLabel, onTaskClick }: Props) {
+export function TaskColumn({ title, icon, tasks, highlight, holidayLabel, holidayDate, onTaskClick }: Props) {
   const svgIcon = columnIcons[title];
   const isHolidayColumn = Boolean(holidayLabel);
+  const formattedHolidayDate = holidayDate
+    ? new Date(`${holidayDate.slice(0, 10)}T12:00:00`).toLocaleDateString("pt-BR")
+    : "";
 
   return (
     <div
@@ -46,10 +50,10 @@ export function TaskColumn({ title, icon, tasks, highlight, holidayLabel, onTask
         minHeight: 0,
         display: "flex",
         flexDirection: "column",
-        background: isHolidayColumn ? "rgba(250,204,21,0.08)" : "rgba(255,255,255,0.025)",
+        background: isHolidayColumn ? "rgba(250,204,21,0.08)" : "var(--bg-panel)",
         borderRadius: 13,
         padding: "14px 12px",
-        border: isHolidayColumn ? "1px solid rgba(250,204,21,0.35)" : "1px solid rgba(255,255,255,0.06)",
+        border: isHolidayColumn ? "1px solid rgba(250,204,21,0.35)" : "1px solid var(--bg-border-soft)",
         boxShadow: isHolidayColumn ? "inset 0 0 0 1px rgba(250,204,21,0.08)" : "none",
       }}
     >
@@ -58,7 +62,7 @@ export function TaskColumn({ title, icon, tasks, highlight, holidayLabel, onTask
         style={{
           marginBottom: 12,
           paddingBottom: 12,
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--bg-border-soft)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -67,7 +71,7 @@ export function TaskColumn({ title, icon, tasks, highlight, holidayLabel, onTask
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <span
             style={{
-              color: isHolidayColumn ? "#facc15" : highlight ? "#94a3b8" : "rgba(148,163,184,0.5)",
+              color: isHolidayColumn ? "#facc15" : highlight ? "var(--text-secondary)" : "var(--text-muted)",
               display: "flex",
               alignItems: "center",
             }}
@@ -79,7 +83,7 @@ export function TaskColumn({ title, icon, tasks, highlight, holidayLabel, onTask
             style={{
               fontSize: 13,
               fontWeight: 600,
-              color: isHolidayColumn ? "#fef3c7" : highlight ? "#e2e8f0" : "rgba(226,232,240,0.7)",
+              color: isHolidayColumn ? "#854d0e" : highlight ? "var(--text-primary)" : "var(--text-secondary)",
               letterSpacing: "-0.01em",
             }}
           >
@@ -98,20 +102,20 @@ export function TaskColumn({ title, icon, tasks, highlight, holidayLabel, onTask
               isHolidayColumn
                 ? "rgba(250,204,21,0.18)"
                 : highlight && tasks.length > 0
-                  ? "rgba(241,245,249,0.12)"
-                  : "rgba(255,255,255,0.06)",
+                  ? "var(--bg-panel-strong)"
+                  : "var(--bg-soft)",
             color:
               isHolidayColumn
                 ? "#facc15"
                 : highlight && tasks.length > 0
-                  ? "#f1f5f9"
-                  : "rgba(148,163,184,0.5)",
+                  ? "var(--text-primary)"
+                  : "var(--text-muted)",
             border:
               isHolidayColumn
                 ? "1px solid rgba(250,204,21,0.35)"
                 : highlight && tasks.length > 0
-                  ? "1px solid rgba(241,245,249,0.15)"
-                  : "1px solid rgba(255,255,255,0.07)",
+                  ? "1px solid var(--bg-border)"
+                  : "1px solid var(--bg-border-soft)",
             minWidth: 26,
             textAlign: "center",
           }}
@@ -128,13 +132,20 @@ export function TaskColumn({ title, icon, tasks, highlight, holidayLabel, onTask
             borderRadius: 8,
             background: "rgba(250,204,21,0.12)",
             border: "1px solid rgba(250,204,21,0.25)",
-            color: "#fef3c7",
+            color: "#a16207",
             fontSize: 10,
             fontWeight: 700,
             lineHeight: 1.3,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 8,
           }}
         >
-          🇧🇷 {holidayLabel}
+          <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            🇧🇷 {holidayLabel}
+          </span>
+          {formattedHolidayDate && <span style={{ flexShrink: 0 }}>{formattedHolidayDate}</span>}
         </div>
       )}
 
@@ -166,7 +177,7 @@ export function TaskColumn({ title, icon, tasks, highlight, holidayLabel, onTask
               height="28"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="rgba(148,163,184,0.2)"
+              stroke="var(--text-muted)"
               strokeWidth="1.5"
               strokeLinecap="round"
             >
@@ -177,7 +188,7 @@ export function TaskColumn({ title, icon, tasks, highlight, holidayLabel, onTask
             <span
               style={{
                 fontSize: 11.5,
-                color: "rgba(148,163,184,0.25)",
+                color: "var(--text-muted)",
                 fontWeight: 500,
               }}
             >

@@ -113,8 +113,8 @@ export function CalendarDayCell({
   const isHolidayDay = Boolean(holiday);
 
   // 🎨 Estados visuais
-  let background = "rgba(255,255,255,0.02)";
-  let borderColor = "rgba(255,255,255,0.06)";
+  let background = "var(--bg-soft)";
+  let borderColor = "var(--bg-border-soft)";
   let boxShadow = "none";
 
   if (isSelected) {
@@ -122,13 +122,13 @@ export function CalendarDayCell({
     borderColor = isHolidayDay ? "rgba(250,204,21,0.5)" : "rgba(56,189,248,0.35)";
     boxShadow = "0 0 0 1px rgba(56,189,248,0.2) inset";
   } else if (isToday) {
-    background = "rgba(255,255,255,0.04)";
+    background = "var(--bg-panel-strong)";
     borderColor = "rgba(148,163,184,0.2)";
   } else if (isBusy) {
     background = "rgba(56,189,248,0.04)";
   } else if (hovered) {
-    background = "rgba(255,255,255,0.05)";
-    borderColor = "rgba(255,255,255,0.1)";
+    background = "var(--bg-panel-strong)";
+    borderColor = "var(--bg-border)";
   }
 
   if (hasPending && !isSelected) {
@@ -203,7 +203,7 @@ export function CalendarDayCell({
             <p
               style={{
                 margin: 0,
-                color: "rgba(148,163,184,0.8)",
+                color: "var(--text-secondary)",
                 fontSize: 14,
                 lineHeight: 1.6,
               }}
@@ -325,7 +325,7 @@ export function CalendarDayCell({
               ? "#38bdf8"
               : isToday
                 ? "#e2e8f0"
-                : "rgba(148,163,184,0.7)",
+                : "var(--text-secondary)",
             lineHeight: 1,
           }}
         >
@@ -360,26 +360,6 @@ export function CalendarDayCell({
           />
         )}
       </div>
-
-      {isHolidayDay && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            fontSize: 9,
-            fontWeight: 700,
-            color: "#facc15",
-            background: "rgba(250,204,21,0.12)",
-            borderRadius: 5,
-            padding: "2px 5px",
-            lineHeight: 1.2,
-          }}
-        >
-          <span>🇧🇷</span>
-          <span>Feriado</span>
-        </div>
-      )}
 
       {/* 📌 Task pills */}
       {visibleTasks.length > 0 && (

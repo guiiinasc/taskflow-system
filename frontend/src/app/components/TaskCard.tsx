@@ -103,13 +103,13 @@ export function TaskCard({ task, onClick }: Props) {
   return (
     <div
       style={{
-        border: "1px solid rgba(255,255,255,0.07)",
+        border: "1px solid var(--bg-border-soft)",
         borderRadius: 11,
         padding: "13px 14px",
         marginBottom: 8,
         background: isCompleted
-          ? "rgba(255,255,255,0.02)"
-          : "rgba(255,255,255,0.04)",
+          ? "var(--bg-soft)"
+          : "var(--bg-panel-strong)",
         opacity: isCompleted ? 0.65 : 1,
         transition: "all 0.18s ease",
         cursor: "pointer",
@@ -121,18 +121,18 @@ export function TaskCard({ task, onClick }: Props) {
       onMouseEnter={(e) => {
         if (!isCompleted) {
           const el = e.currentTarget;
-          el.style.background = "rgba(255,255,255,0.07)";
-          el.style.borderColor = "rgba(255,255,255,0.12)";
+          el.style.background = "var(--bg-panel)";
+          el.style.borderColor = "var(--bg-border)";
           el.style.transform = "translateY(-1px)";
-          el.style.boxShadow = "0 4px 20px rgba(0,0,0,0.25)";
+          el.style.boxShadow = "0 4px 20px var(--shadow-soft)";
         }
       }}
       onMouseLeave={(e) => {
         const el = e.currentTarget;
         el.style.background = isCompleted
-          ? "rgba(255,255,255,0.02)"
-          : "rgba(255,255,255,0.04)";
-        el.style.borderColor = "rgba(255,255,255,0.07)";
+          ? "var(--bg-soft)"
+          : "var(--bg-panel-strong)";
+        el.style.borderColor = "var(--bg-border-soft)";
         el.style.transform = "translateY(0)";
         el.style.boxShadow = "none";
       }}
@@ -181,7 +181,7 @@ export function TaskCard({ task, onClick }: Props) {
       <p
         style={{
           fontSize: 11,
-          color: "rgba(148,163,184,0.6)",
+          color: "var(--text-muted)",
           lineHeight: 1.4,
           marginBottom: 8,
         }}
@@ -196,7 +196,7 @@ export function TaskCard({ task, onClick }: Props) {
         style={{
           fontSize: 13.5,
           fontWeight: 600,
-          color: isCompleted ? "rgba(248,250,252,0.4)" : "#f1f5f9",
+          color: isCompleted ? "var(--text-muted)" : "var(--text-primary)",
           textDecoration: isCompleted ? "line-through" : "none",
           letterSpacing: "-0.02em",
           lineHeight: 1.35,
@@ -212,7 +212,7 @@ export function TaskCard({ task, onClick }: Props) {
       <p
         style={{
           fontSize: 11.5,
-          color: "rgba(148,163,184,0.55)",
+          color: "var(--text-secondary)",
           lineHeight: 1.4,
           marginBottom: 11,
         }}
@@ -228,7 +228,7 @@ export function TaskCard({ task, onClick }: Props) {
           justifyContent: "space-between",
           alignItems: "center",
           paddingTop: 9,
-          borderTop: "1px solid rgba(255,255,255,0.06)",
+          borderTop: "1px solid var(--bg-border-soft)",
         }}
       >
         {/* ICON + ID */}
@@ -238,7 +238,7 @@ export function TaskCard({ task, onClick }: Props) {
             height="12"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="rgba(148,163,184,0.5)"
+            stroke="var(--text-muted)"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -256,7 +256,7 @@ export function TaskCard({ task, onClick }: Props) {
           <span
             style={{
               fontSize: 11,
-              color: "rgba(148,163,184,0.45)",
+              color: "var(--text-muted)",
               fontWeight: 500,
             }}
           >

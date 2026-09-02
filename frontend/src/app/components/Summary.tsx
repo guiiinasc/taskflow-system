@@ -23,8 +23,8 @@ export function Summary({ total, pending, completed }: Props) {
         alignItems: "stretch",
         gap: 0,
         marginBottom: 28,
-        background: "rgba(255,255,255,0.025)",
-        border: "1px solid rgba(255,255,255,0.07)",
+        background: "var(--bg-panel)",
+        border: "1px solid var(--bg-border)",
         borderRadius: 13,
         overflow: "hidden",
       }}
@@ -89,7 +89,7 @@ function Item({ label, value, accent, icon }: ItemProps) {
           style={{
             fontSize: 11,
             fontWeight: 600,
-            color: "rgba(148,163,184,0.55)",
+            color: "var(--text-muted)",
             letterSpacing: "0.06em",
             textTransform: "uppercase",
           }}
@@ -102,7 +102,7 @@ function Item({ label, value, accent, icon }: ItemProps) {
         style={{
           fontSize: 36,
           fontWeight: 800,
-          color: accent ?? "#f1f5f9",
+          color: accent ?? "var(--text-primary)",
           letterSpacing: "-0.04em",
           lineHeight: 1,
         }}
@@ -133,7 +133,7 @@ function Divider() {
     <div
       style={{
         width: 1,
-        background: "rgba(255,255,255,0.06)",
+        background: "var(--bg-border-soft)",
         flexShrink: 0,
       }}
     />

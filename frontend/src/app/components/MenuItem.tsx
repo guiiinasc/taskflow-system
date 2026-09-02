@@ -20,7 +20,7 @@ export function MenuItem({ label, active, onClick }: Props) {
         padding: "9px 10px",
         borderRadius: 9,
         background: active
-          ? "rgba(255,255,255,0.08)"
+          ? "var(--bg-panel-strong)"
           : "transparent",
         cursor: "pointer",
         display: "flex",
@@ -28,15 +28,15 @@ export function MenuItem({ label, active, onClick }: Props) {
         gap: 10,
         transition: "all 0.15s ease",
         border: active
-          ? "1px solid rgba(255,255,255,0.1)"
+          ? "1px solid var(--bg-border)"
           : "1px solid transparent",
       }}
       onMouseEnter={e => {
         if (!active) {
           (e.currentTarget as HTMLDivElement).style.background =
-            "rgba(255,255,255,0.04)";
+            "var(--bg-panel)";
           (e.currentTarget as HTMLDivElement).style.borderColor =
-            "rgba(255,255,255,0.06)";
+            "var(--bg-border-soft)";
         }
       }}
       onMouseLeave={e => {
@@ -52,7 +52,7 @@ export function MenuItem({ label, active, onClick }: Props) {
         height="15"
         viewBox="0 0 24 24"
         fill="none"
-        stroke={active ? "#e2e8f0" : "rgba(148,163,184,0.55)"}
+        stroke={active ? "var(--text-primary)" : "var(--text-muted)"}
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -66,7 +66,7 @@ export function MenuItem({ label, active, onClick }: Props) {
         style={{
           fontSize: 13,
           fontWeight: active ? 600 : 400,
-          color: active ? "#f1f5f9" : "rgba(148,163,184,0.65)",
+          color: active ? "var(--text-primary)" : "var(--text-secondary)",
           letterSpacing: "-0.01em",
           transition: "color 0.15s ease",
         }}
@@ -83,7 +83,7 @@ export function MenuItem({ label, active, onClick }: Props) {
             top: "20%",
             bottom: "20%",
             width: 3,
-            background: "#e2e8f0",
+            background: "var(--text-primary)",
             borderRadius: "0 3px 3px 0",
           }}
         />

@@ -48,8 +48,8 @@ export function CalendarGrid({
         display: "flex",
         flexDirection: "column",
         gap: gap,
-        background: "rgba(255,255,255,0.025)",
-        border: "1px solid rgba(255,255,255,0.07)",
+        background: "var(--bg-panel)",
+        border: "1px solid var(--bg-border-soft)",
         borderRadius: 13,
         padding,
         overflow: "hidden",
@@ -75,7 +75,7 @@ export function CalendarGrid({
               fontWeight: 600,
               letterSpacing: isMobile ? "0.04em" : "0.07em",
               textTransform: "uppercase",
-              color: "rgba(148,163,184,0.45)",
+              color: "var(--text-secondary)",
               padding: "3px 0",
             }}
           >

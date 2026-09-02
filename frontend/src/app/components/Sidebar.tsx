@@ -17,13 +17,13 @@ export function Sidebar({ view, setView, onNewTask }: Props) {
       style={{
         width: 220,
         height: "100vh",
-        background: "linear-gradient(180deg, #0F172A 0%, #111827 100%)",
+        background: "linear-gradient(180deg, var(--bg-page-2) 0%, var(--bg-page) 100%)",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
         padding: "20px 12px",
-        borderRight: "1px solid rgba(255,255,255,0.06)",
-        boxShadow: "4px 0 24px rgba(0,0,0,0.25)",
+        borderRight: "1px solid var(--bg-border-soft)",
+        boxShadow: "4px 0 24px var(--shadow-soft)",
         position: "relative",
         overflow: "hidden",
       }}
@@ -48,7 +48,7 @@ export function Sidebar({ view, setView, onNewTask }: Props) {
             alignItems: "center",
             gap: 11,
             padding: "8px 10px 20px",
-            borderBottom: "1px solid rgba(255,255,255,0.07)",
+            borderBottom: "1px solid var(--bg-border-soft)",
             marginBottom: 8,
           }}
         >
@@ -57,13 +57,13 @@ export function Sidebar({ view, setView, onNewTask }: Props) {
               width: 36,
               height: 36,
               borderRadius: 9,
-              background: "linear-gradient(135deg, #334155 0%, #1e293b 100%)",
+              background: "linear-gradient(135deg, #7c3aed 0%, #2563eb 100%)",
               border: "1px solid rgba(255,255,255,0.12)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
             }}
           >
             <span style={{ fontSize: 15, fontWeight: 800, color: "#f8fafc", letterSpacing: -1 }}>
@@ -71,11 +71,11 @@ export function Sidebar({ view, setView, onNewTask }: Props) {
             </span>
           </div>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 700, color: "#f8fafc", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
               TaskFlow
             </p>
-            <p style={{ fontSize: 10.5, color: "rgba(148,163,184,0.8)", marginTop: 1, letterSpacing: "0.01em" }}>
-              Main Hub · Zone A1
+            <p style={{ fontSize: 10.5, color: "var(--text-secondary)", marginTop: 1, letterSpacing: "0.01em" }}>
+              Sistema de Gestão de Tarefas
             </p>
           </div>
         </div>
@@ -87,7 +87,7 @@ export function Sidebar({ view, setView, onNewTask }: Props) {
             fontWeight: 600,
             letterSpacing: "0.1em",
             textTransform: "uppercase",
-            color: "rgba(148,163,184,0.4)",
+            color: "var(--text-muted)",
             padding: "0 10px",
             marginBottom: 6,
             marginTop: 8,
@@ -124,9 +124,9 @@ export function Sidebar({ view, setView, onNewTask }: Props) {
             width: "100%",
             padding: "11px 16px",
             borderRadius: 10,
-            border: "1px solid rgba(255,255,255,0.1)",
-            background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
-            color: "#f8fafc",
+            border: "1px solid var(--bg-border)",
+            background: "linear-gradient(135deg, rgba(59,130,246,0.4) 0%, rgba(14,165,233,0.2) 100%)",
+            color: "var(--text-primary)",
             fontWeight: 600,
             fontSize: 13,
             cursor: "pointer",
@@ -136,21 +136,21 @@ export function Sidebar({ view, setView, onNewTask }: Props) {
             justifyContent: "center",
             gap: 7,
             letterSpacing: "-0.01em",
-            boxShadow: "0 1px 0 rgba(255,255,255,0.06) inset, 0 4px 12px rgba(0,0,0,0.2)",
+            boxShadow: "0 1px 0 rgba(255,255,255,0.06) inset, 0 4px 12px var(--shadow-soft)",
             transition: "all 0.18s ease",
           }}
           onMouseEnter={e => {
             (e.currentTarget as HTMLButtonElement).style.background =
-              "linear-gradient(135deg, #334155 0%, #1e293b 100%)";
+              "linear-gradient(135deg, rgba(59,130,246,0.55) 0%, rgba(14,165,233,0.35) 100%)";
             (e.currentTarget as HTMLButtonElement).style.borderColor =
-              "rgba(255,255,255,0.18)";
+              "var(--bg-border)";
           }}
           onClick={onNewTask}
           onMouseLeave={e => {
             (e.currentTarget as HTMLButtonElement).style.background =
-              "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)";
+              "linear-gradient(135deg, rgba(59,130,246,0.4) 0%, rgba(14,165,233,0.2) 100%)";
             (e.currentTarget as HTMLButtonElement).style.borderColor =
-              "rgba(255,255,255,0.1)";
+              "var(--bg-border)";
           }}
         >
           <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
@@ -158,7 +158,7 @@ export function Sidebar({ view, setView, onNewTask }: Props) {
         </button>
 
           {/* DIVIDER */}
-          <div style={{ height: 1, background: "rgba(255,255,255,0.07)", marginBottom: 14 }} />
+          <div style={{ height: 1, background: "var(--bg-border-soft)", marginBottom: 14 }} />
 
           {/* USUÁRIO / LOGIN */}
           <AuthArea />
@@ -169,7 +169,7 @@ export function Sidebar({ view, setView, onNewTask }: Props) {
 
 function AuthArea() {
   const { user } = useAuth();
-  const { openLogin, openRegister } = useAuthModal();
+  const { openLogin } = useAuthModal();
 
   return (
     <>
@@ -183,8 +183,8 @@ function AuthArea() {
           gap: 10,
           padding: "8px 10px",
           borderRadius: 10,
-          background: "rgba(255,255,255,0.03)",
-          border: "1px solid rgba(255,255,255,0.06)",
+          background: "var(--bg-soft)",
+          border: "1px solid var(--bg-border-soft)",
           cursor: "pointer",
         }}
       >
@@ -207,10 +207,10 @@ function AuthArea() {
           {user ? user.email.charAt(0).toUpperCase() : "→"}
         </div>
         <div style={{ overflow: "hidden" }}>
-          <p style={{ fontSize: 12, fontWeight: 600, color: "#f1f5f9", margin: 0 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>
             {user ? user.email : "Entrar"}
           </p>
-          <p style={{ fontSize: 10, color: "rgba(148,163,184,0.6)", margin: 0 }}>
+          <p style={{ fontSize: 10, color: "var(--text-secondary)", margin: 0 }}>
             {user ? "Operações" : "Faça login ou registre-se"}
           </p>
         </div>
