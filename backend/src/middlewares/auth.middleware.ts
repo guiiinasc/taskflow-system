@@ -16,14 +16,10 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
 
 try {
   const decoded = verifyToken(token);
-
-  console.log("TOKEN DECODED:", decoded); // 👈 adiciona isso
-
   (req as any).user = decoded;
 
   next();
 } catch (err) {
-  console.log("ERRO NO TOKEN:", err); // 👈 adiciona isso
   return res.status(401).json({ error: "Token inválido" });
 }
 }
