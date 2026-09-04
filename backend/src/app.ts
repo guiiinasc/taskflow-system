@@ -10,8 +10,20 @@ import tasksRoutes from "./modules/tasks/tasks.routes";
 dotenv.config();
 
 const app = express();
+const allowedOrigins = [
+  "https://taskflow-syst.vercel.app",
+  "http://localhost:3000",
+  ...(process.env.FRONTEND_URL?.split(",").map((origin) => origin.trim()).filter(Boolean) ?? []),
+];
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "https://taskflow-syst.vercel.app",
+  origin: (origin: string | undefined, callback: (error: Error | null, allowed?: boolean) => void) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Origem não permitida pelo CORS"));
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
